@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 void isDigitStr(const std::string &str, uint &index_end)
 {
@@ -74,17 +75,18 @@ uint getPuzzleSize(const std::string &line, uint i, uint &colError)
 
 void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero, Puzzle &puzzle)
 {
-	static uint       y = 0;
-	uint              x = 0;
-	uint              n;
-	uint              size = puzzle.getSize();
-	size_t            nbChars;
-	std::stringstream errorStream;
+	uint                     size = puzzle.getSize();
+	static std::vector<bool> hashTable(size * size, false);
+	static uint              y = 0;
+	uint                     x = 0;
+	uint                     n;
+	size_t                   nbChars;
+	std::stringstream        errorStream;
 
 	for (; x < size; x++)
 	{
 		colError = i;
-		n = strtou(line.c_str() + i, &nbChars, std::numeric_limits<uint>::max(), 0);
+		n = strtou(line.c_str() + i, &nbChars, size * size - 1, 0);
 		if (size == y)
 			throw Exception::ParserLight("The number of lines does not match the given size", false);
 		if (n == 0)
@@ -93,20 +95,23 @@ void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero
 				throw Exception::ParserLight("Multiple zero numbers");
 			hasZero = true;
 		}
+		if (hashTable[n])
+			throw Exception::ParserLight("Number already set");
+		else
+			hashTable[n] = true;
 		puzzle.at(y, x) = n;
 		for (i += nbChars; i < line.length() && std::isspace(line[i]); i++)
 			;
 		if (i == line.length() || line[i] == '#')
 			break;
 	}
-	x++;
 	colError = i;
-	if (x < size)
+	if (x + 1 < size)
 	{
 		errorStream << "Not enough arguments, " << size << " numbers are required";
 		throw Exception::ParserLight(errorStream.str());
 	}
-	if (x > size)
+	if (x + 1 > size)
 	{
 		errorStream << "Too much arguments, " << size << " numbers are required";
 		throw Exception::ParserLight(errorStream.str());
