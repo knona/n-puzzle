@@ -27,7 +27,7 @@ uint strtou(const std::string &str, size_t *index = nullptr, uint max = std::num
 {
 	unsigned long     n;
 	uint              index_end;
-	std::stringstream sstream;
+	std::stringstream errorStream;
 
 	isDigitStr(str, index_end);
 	std::string_view n_str(str.c_str(), index_end);
@@ -37,22 +37,22 @@ uint strtou(const std::string &str, size_t *index = nullptr, uint max = std::num
 	}
 	catch (const std::out_of_range &e)
 	{
-		sstream << n_str << " is greater than " << max;
-		throw Exception::ParserLight(sstream.str());
+		errorStream << n_str << " is greater than " << max;
+		throw Exception::ParserLight(errorStream.str());
 	}
 
 	if (n < min)
 	{
-		sstream << n_str << " is lower than " << min;
-		throw Exception::ParserLight(sstream.str());
+		errorStream << n_str << " is lower than " << min;
+		throw Exception::ParserLight(errorStream.str());
 	}
 	if (n > max)
 	{
 		if (str[0] == '-')
-			sstream << n_str << " is lower than " << min;
+			errorStream << n_str << " is lower than " << min;
 		else
-			sstream << n_str << " is greater than " << max;
-		throw Exception::ParserLight(sstream.str());
+			errorStream << n_str << " is greater than " << max;
+		throw Exception::ParserLight(errorStream.str());
 	}
 
 	return static_cast<uint>(n);
@@ -79,7 +79,7 @@ void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero
 	uint              n;
 	uint              size = puzzle.getSize();
 	size_t            nbChars;
-	std::stringstream sstream;
+	std::stringstream errorStream;
 
 	for (; x < size; x++)
 	{
@@ -103,13 +103,13 @@ void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero
 	colError = i;
 	if (x < size)
 	{
-		sstream << "Not enough arguments, " << size << " numbers are required";
-		throw Exception::ParserLight(sstream.str());
+		errorStream << "Not enough arguments, " << size << " numbers are required";
+		throw Exception::ParserLight(errorStream.str());
 	}
 	if (x > size)
 	{
-		sstream << "Too much arguments, " << size << " numbers are required";
-		throw Exception::ParserLight(sstream.str());
+		errorStream << "Too much arguments, " << size << " numbers are required";
+		throw Exception::ParserLight(errorStream.str());
 	}
 	y++;
 }
