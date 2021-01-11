@@ -8,7 +8,7 @@ const char *Exception::GameOver::what() const throw()
 Exception::Parser::Parser(const std::string line, uint lineNb, uint col, const std::string &detail)
 {
 	std::stringstream buffer;
-	buffer << detail << " at line " << lineNb << ", col " << col << std::endl;
+	buffer << detail << " \033[0;36m[" << lineNb << ":" << col << "]\033[0m" << std::endl;
 	buffer << line << std::endl;
 	for (uint i = 0; i < col; i++)
 		buffer << " ";

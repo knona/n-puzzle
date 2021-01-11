@@ -18,6 +18,7 @@ int main(int argc, char const *argv[])
 	}
 	catch (const std::exception &e)
 	{
+		std::cerr << "\033[0;31mError:\033[0m" << std::endl;
 		std::cerr << e.what() << std::endl;
 		return 1;
 	}
