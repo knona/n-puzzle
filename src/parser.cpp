@@ -77,7 +77,7 @@ uint getPuzzleSize(const std::string &line, uint i, uint &start)
 	for (i += nbChars; i < line.length() && std::isspace(line[i]); i++)
 		;
 	if (i != line.length() && line[i] != '#')
-		throw Exception::ParserLight("Puzzle' size is required");
+		throw Exception::ParserLight("Puzzle's size is required");
 	return n;
 }
 
@@ -149,12 +149,16 @@ Puzzle parser(const char *file)
 	bool          hasZero = false;
 	uint          lineCount = 0;
 	uint          start = 0;
+	uint          linesProcessed = 0;
 
 	while (std::getline(stream, line))
 	{
+		if (puzzle.getSize() != 0 && puzzle.getSize() == linesProcessed)
+			throw Exception::ParserLight("The number of lines does not match the given size");
 		try
 		{
 			processLine(line, start, hasZero, puzzle);
+			linesProcessed++;
 		}
 		catch (const Exception::ParserLight &e)
 		{
@@ -166,6 +170,8 @@ Puzzle parser(const char *file)
 	closeFile(stream, file);
 	if (puzzle.getSize() == 0)
 		throw Exception::ParserLight("Invalid file");
+	if (puzzle.getSize() != linesProcessed)
+		throw Exception::ParserLight("The number of lines does not match the given size");
 	if (!hasZero)
 		throw Exception::ParserLight("A zero number is required");
 	return puzzle;
