@@ -58,12 +58,12 @@ uint strtou(const std::string &str, size_t *index = nullptr, uint max = std::num
 	return static_cast<uint>(n);
 }
 
-uint getPuzzleSize(const std::string &line, uint i, uint &start)
+uint getPuzzleSize(const std::string &line, uint i, uint &colError)
 {
 	size_t nbChars;
 	uint   n;
 
-	start = i;
+	colError = i;
 	n = strtou(line.c_str() + i, &nbChars, 100, 3);
 	for (i += nbChars; i < line.length() && std::isspace(line[i]); i++)
 		;
@@ -72,7 +72,7 @@ uint getPuzzleSize(const std::string &line, uint i, uint &start)
 	return n;
 }
 
-void getPuzzleRow(const std::string &line, uint i, uint &start, bool &hasZero, Puzzle &puzzle)
+void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero, Puzzle &puzzle)
 {
 	static uint       y = 0;
 	uint              x = 0;
@@ -83,7 +83,7 @@ void getPuzzleRow(const std::string &line, uint i, uint &start, bool &hasZero, P
 
 	for (; x < size; x++)
 	{
-		start = i;
+		colError = i;
 		n = strtou(line.c_str() + i, &nbChars, std::numeric_limits<uint>::max(), 0);
 		if (size == y)
 			throw Exception::ParserLight("The number of lines does not match the given size", false);
@@ -100,7 +100,7 @@ void getPuzzleRow(const std::string &line, uint i, uint &start, bool &hasZero, P
 			break;
 	}
 	x++;
-	start = i;
+	colError = i;
 	if (x < size)
 	{
 		sstream << "Not enough arguments, " << size << " numbers are required";
@@ -114,7 +114,7 @@ void getPuzzleRow(const std::string &line, uint i, uint &start, bool &hasZero, P
 	y++;
 }
 
-Puzzle parserFromStream(std::istream &stream, std::string &line, uint &lineCount, uint &start)
+Puzzle parserFromStream(std::istream &stream, std::string &line, uint &lineCount, uint &colError)
 {
 	Puzzle puzzle;
 	bool   hasZero = false;
@@ -131,10 +131,10 @@ Puzzle parserFromStream(std::istream &stream, std::string &line, uint &lineCount
 			continue;
 		}
 		if (puzzle.getSize() == 0)
-			puzzle = Puzzle(getPuzzleSize(line, i, start));
+			puzzle = Puzzle(getPuzzleSize(line, i, colError));
 		else
 		{
-			getPuzzleRow(line, i, start, hasZero, puzzle);
+			getPuzzleRow(line, i, colError, hasZero, puzzle);
 			nbRows++;
 		}
 		lineCount++;
@@ -168,18 +168,18 @@ Puzzle parser(const char *file)
 	std::istream &stream = file ? streamFromFile(file) : std::cin;
 	std::string   line;
 	uint          lineCount = 0;
-	uint          start = 0;
+	uint          colError = 0;
 	Puzzle        puzzle;
 
 	try
 	{
-		puzzle = parserFromStream(stream, line, lineCount, start);
+		puzzle = parserFromStream(stream, line, lineCount, colError);
 	}
 	catch (const Exception::ParserLight &e)
 	{
 		closeFile(stream, file);
 		if (e.getAddPosition())
-			throw Exception::Parser(line, lineCount, start, e.what());
+			throw Exception::Parser(line, lineCount, colError, e.what());
 		throw;
 	}
 	closeFile(stream, file);
