@@ -10,6 +10,12 @@ void Puzzle::init(uint size)
 	std::memset(this->_data.get(), 0, size * size);
 }
 
+Puzzle::Puzzle()
+{
+	this->_size = 0;
+	this->_data = nullptr;
+}
+
 Puzzle::Puzzle(uint size)
 {
 	this->init(size);
@@ -29,6 +35,7 @@ Puzzle &Puzzle::operator=(const Puzzle &puzzle)
 {
 	if (this != &puzzle)
 	{
+		this->_data.reset();
 		init(puzzle._size);
 		std::memcpy(this->_data.get(), puzzle._data.get(), this->_size * this->_size);
 	}
@@ -39,6 +46,7 @@ Puzzle &Puzzle::operator=(Puzzle &&puzzle)
 {
 	if (this != &puzzle)
 	{
+		this->_data.reset();
 		this->_size = puzzle._size;
 		this->_data = std::move(puzzle._data);
 	}
@@ -47,6 +55,11 @@ Puzzle &Puzzle::operator=(Puzzle &&puzzle)
 
 Puzzle::~Puzzle()
 {}
+
+uint Puzzle::getSize() const
+{
+	return this->_size;
+}
 
 uint *Puzzle::operator[](uint index)
 {

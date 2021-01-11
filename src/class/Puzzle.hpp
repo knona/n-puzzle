@@ -18,7 +18,7 @@ class Puzzle
 	void init(uint size);
 
 	public:
-	Puzzle() = delete;
+	Puzzle();
 	Puzzle(uint size);
 	Puzzle(const Puzzle &);
 	Puzzle &operator=(const Puzzle &);
@@ -26,6 +26,7 @@ class Puzzle
 	Puzzle &operator=(Puzzle &&);
 	~Puzzle();
 
+	uint        getSize() const;
 	uint *      operator[](uint index);
 	const uint *operator[](uint index) const;
 	uint &      at(uint a, uint b);
