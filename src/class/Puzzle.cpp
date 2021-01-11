@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <exception>
+#include <iomanip>
 
 void Puzzle::init(uint size)
 {
@@ -109,6 +110,8 @@ uint Puzzle::at(Position pos) const
 
 void Puzzle::print(std::ostream &os) const
 {
+	uint width = std::to_string(this->_size * this->_size - 1).length();
+
 	os << this->_size << std::endl;
 	for (uint i = 0; i < this->_size; i++)
 	{
@@ -116,7 +119,7 @@ void Puzzle::print(std::ostream &os) const
 		{
 			if (j != 0)
 				os << " ";
-			os << this->at(i, j);
+			os << std::setw(width) << this->at(i, j);
 		}
 		os << std::endl;
 	}
