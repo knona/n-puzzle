@@ -83,11 +83,12 @@ uint getPuzzleSize(const std::string &line, uint i, uint &start)
 
 void getPuzzleRaw(const std::string &line, uint i, uint &start, bool &hasZero, Puzzle &puzzle)
 {
-	static uint y = 0;
-	uint        x = 0;
-	uint        n;
-	uint        size = puzzle.getSize();
-	size_t      nbChars;
+	static uint       y = 0;
+	uint              x = 0;
+	uint              n;
+	uint              size = puzzle.getSize();
+	size_t            nbChars;
+	std::stringstream sstream;
 
 	for (; x < size; x++)
 	{
@@ -108,9 +109,15 @@ void getPuzzleRaw(const std::string &line, uint i, uint &start, bool &hasZero, P
 	x++;
 	start = i;
 	if (x < size)
-		throw Exception::ParserLight(std::string("Too few numbers, ") + std::to_string(size) + " are required");
+	{
+		sstream << "Not enough arguments, " << size << " numbers are required";
+		throw Exception::ParserLight(sstream.str());
+	}
 	if (x > size)
-		throw Exception::ParserLight(std::string("Too much numbers, ") + std::to_string(size) + " are required");
+	{
+		sstream << "Too much arguments, " << size << " numbers are required";
+		throw Exception::ParserLight(sstream.str());
+	}
 	y++;
 }
 
