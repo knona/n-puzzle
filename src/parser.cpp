@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 
-void isDigitStr(const std::string &str)
+void isDigitStr(const std::string &str, uint &index_end)
 {
 	uint i = 0;
 	uint sign = 0;
@@ -20,37 +20,38 @@ void isDigitStr(const std::string &str)
 		i++;
 	if (i == sign || (str[i] != '\0' && !std::isspace(str[i])))
 		throw Exception::ParserLight("Argument is not a valid number");
+	index_end = i;
 }
 
-// max must be lower or equal to max int
-// min must be greater or equal to 0
-uint strtou(const std::string &str, int max, int min, size_t *index = 0)
+uint strtou(const std::string &str, size_t *index = nullptr, uint max = std::numeric_limits<uint>::max(), uint min = 0)
 {
-	int               n;
+	unsigned long     n;
+	uint              index_end;
 	std::stringstream sstream;
 
-	isDigitStr(str);
+	isDigitStr(str, index_end);
+	std::string_view n_str(str.c_str(), index_end);
 	try
 	{
 		n = std::stoi(str, index);
 	}
 	catch (const std::out_of_range &e)
 	{
-		if (str[0] == '-')
-			sstream << n << " is lower than " << min;
-		else
-			sstream << n << " is greater than " << max;
+		sstream << n_str << " is greater than " << max;
 		throw Exception::ParserLight(sstream.str());
 	}
 
 	if (n < min)
 	{
-		sstream << n << " is lower than " << min;
+		sstream << n_str << " is lower than " << min;
 		throw Exception::ParserLight(sstream.str());
 	}
 	if (n > max)
 	{
-		sstream << n << " is greater than " << max;
+		if (str[0] == '-')
+			sstream << n_str << " is lower than " << min;
+		else
+			sstream << n_str << " is greater than " << max;
 		throw Exception::ParserLight(sstream.str());
 	}
 
@@ -72,7 +73,7 @@ uint getPuzzleSize(const std::string &line, uint i, uint &start)
 	uint   n;
 
 	start = i;
-	n = strtou(line.c_str() + i, 100, 3, &nbChars);
+	n = strtou(line.c_str() + i, &nbChars, 100, 3);
 	for (i += nbChars; i < line.length() && std::isspace(line[i]); i++)
 		;
 	if (i != line.length() && line[i] != '#')
@@ -91,7 +92,7 @@ void getPuzzleRaw(const std::string &line, uint i, uint &start, bool &hasZero, P
 	for (; x < size; x++)
 	{
 		start = i;
-		n = strtou(line.c_str() + i, std::numeric_limits<int>::max(), 0, &nbChars);
+		n = strtou(line.c_str() + i, &nbChars, std::numeric_limits<uint>::max(), 0);
 		if (n == 0)
 		{
 			if (hasZero)
