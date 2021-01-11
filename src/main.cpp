@@ -11,10 +11,10 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	Puzzle puz;
+	Puzzle puzzle;
 	try
 	{
-		puz = parser(argv[1]);
+		puzzle = parser(argv[1]);
 	}
 	catch (const std::exception &e)
 	{
@@ -22,6 +22,6 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	std::cout << puz << std::endl;
+	std::cout << puzzle << std::endl;
 	return 0;
 }
