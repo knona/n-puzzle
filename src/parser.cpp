@@ -18,7 +18,7 @@ void isDigitStr(const std::string &str, uint &index_end)
 	}
 	while (i < str.length() && str[i] >= '0' && str[i] <= '9')
 		i++;
-	if (i == sign || (str[i] != '\0' && !std::isspace(str[i])))
+	if (i == sign || (str[i] != '\0' && str[i] != '#' && !std::isspace(str[i])))
 		throw Exception::ParserLight("Argument is not a valid number");
 	index_end = i;
 }
@@ -58,15 +58,6 @@ uint strtou(const std::string &str, size_t *index = nullptr, uint max = std::num
 	return static_cast<uint>(n);
 }
 
-std::istream &streamFromFile(const char *file)
-{
-	static std::ifstream stream(file);
-
-	if (!stream.is_open())
-		throw std::runtime_error(std::string("File ") + file + " cannot be openned");
-	return stream;
-}
-
 uint getPuzzleSize(const std::string &line, uint i, uint &start)
 {
 	size_t nbChars;
@@ -81,7 +72,7 @@ uint getPuzzleSize(const std::string &line, uint i, uint &start)
 	return n;
 }
 
-void getPuzzleRaw(const std::string &line, uint i, uint &start, bool &hasZero, Puzzle &puzzle)
+void getPuzzleRow(const std::string &line, uint i, uint &start, bool &hasZero, Puzzle &puzzle)
 {
 	static uint       y = 0;
 	uint              x = 0;
@@ -94,6 +85,8 @@ void getPuzzleRaw(const std::string &line, uint i, uint &start, bool &hasZero, P
 	{
 		start = i;
 		n = strtou(line.c_str() + i, &nbChars, std::numeric_limits<uint>::max(), 0);
+		if (size == y)
+			throw Exception::ParserLight("The number of lines does not match the given size", false);
 		if (n == 0)
 		{
 			if (hasZero)
@@ -121,18 +114,47 @@ void getPuzzleRaw(const std::string &line, uint i, uint &start, bool &hasZero, P
 	y++;
 }
 
-void processLine(const std::string &line, uint &start, bool &hasZero, Puzzle &puzzle)
+Puzzle parserFromStream(std::istream &stream, std::string &line, uint &lineCount, uint &start)
 {
-	uint i;
+	Puzzle puzzle;
+	bool   hasZero = false;
+	uint   nbRows = 0;
+	uint   i;
 
-	for (i = 0; i < line.length() && std::isspace(line[i]); i++)
-		;
-	if (i == line.length() || line[i] == '#')
-		return;
+	while (std::getline(stream, line))
+	{
+		for (i = 0; i < line.length() && std::isspace(line[i]); i++)
+			;
+		if (i == line.length() || line[i] == '#')
+		{
+			lineCount++;
+			continue;
+		}
+		if (puzzle.getSize() == 0)
+			puzzle = Puzzle(getPuzzleSize(line, i, start));
+		else
+		{
+			getPuzzleRow(line, i, start, hasZero, puzzle);
+			nbRows++;
+		}
+		lineCount++;
+	}
 	if (puzzle.getSize() == 0)
-		puzzle = Puzzle(getPuzzleSize(line, i, start));
-	else
-		getPuzzleRaw(line, i, start, hasZero, puzzle);
+		throw Exception::ParserLight("Invalid file", false);
+	if (puzzle.getSize() != nbRows)
+		throw Exception::ParserLight("The number of lines does not match the given size", false);
+	if (!hasZero)
+		throw Exception::ParserLight("A zero number is required", false);
+	return puzzle;
+}
+
+std::istream &streamFromFile(const char *file)
+{
+	static std::ifstream stream(file);
+
+	if (!stream.is_open())
+		throw std::runtime_error(std::string("File ") + file + " cannot be openned");
+	return stream;
 }
 
 void closeFile(std::istream &stream, const char *file)
@@ -145,34 +167,21 @@ Puzzle parser(const char *file)
 {
 	std::istream &stream = file ? streamFromFile(file) : std::cin;
 	std::string   line;
-	Puzzle        puzzle;
-	bool          hasZero = false;
 	uint          lineCount = 0;
 	uint          start = 0;
-	uint          linesProcessed = 0;
+	Puzzle        puzzle;
 
-	while (std::getline(stream, line))
+	try
 	{
-		if (puzzle.getSize() != 0 && puzzle.getSize() == linesProcessed)
-			throw Exception::ParserLight("The number of lines does not match the given size");
-		try
-		{
-			processLine(line, start, hasZero, puzzle);
-			linesProcessed++;
-		}
-		catch (const Exception::ParserLight &e)
-		{
-			closeFile(stream, file);
+		puzzle = parserFromStream(stream, line, lineCount, start);
+	}
+	catch (const Exception::ParserLight &e)
+	{
+		closeFile(stream, file);
+		if (e.getAddPosition())
 			throw Exception::Parser(line, lineCount, start, e.what());
-		}
-		lineCount++;
+		throw;
 	}
 	closeFile(stream, file);
-	if (puzzle.getSize() == 0)
-		throw Exception::ParserLight("Invalid file");
-	if (puzzle.getSize() != linesProcessed)
-		throw Exception::ParserLight("The number of lines does not match the given size");
-	if (!hasZero)
-		throw Exception::ParserLight("A zero number is required");
 	return puzzle;
 }
