@@ -28,9 +28,13 @@ class Exception
 
 	class ParserLight: public std::exception
 	{
+		private:
+		bool _addPosition;
+
 		public:
-		ParserLight(const std::string &detail);
+		ParserLight(const std::string &detail, bool addPosition = true);
 		virtual const char *what() const throw();
+		bool                getAddPosition() const;
 	};
 };
 

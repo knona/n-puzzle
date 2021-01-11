@@ -21,9 +21,15 @@ const char *Exception::Parser::Parser::what() const throw()
 	return Exception::error.c_str();
 }
 
-Exception::ParserLight::ParserLight(const std::string &detail)
+Exception::ParserLight::ParserLight(const std::string &detail, bool addPosition)
 {
+	this->_addPosition = addPosition;
 	Exception::error = detail;
+}
+
+bool Exception::ParserLight::getAddPosition() const
+{
+	return this->_addPosition;
 }
 
 const char *Exception::ParserLight::ParserLight::what() const throw()
