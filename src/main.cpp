@@ -7,7 +7,7 @@ int main(int argc, char const *argv[])
 {
 	if (argc > 2)
 	{
-		std::cerr << "Usage: " << argv[0] << " [file]";
+		std::cerr << "Usage: " << argv[0] << " [puzzle file]" << std::endl;
 		return 1;
 	}
 
