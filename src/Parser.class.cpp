@@ -29,7 +29,7 @@ void Parser::closeFile()
 		this->_fileStream.close();
 }
 
-void Parser::isDigitStr(const std::string &str, uint &index_end)
+void Parser::isDigitStr(const std::string &str, uint &indexEnd)
 {
 	uint i = 0;
 	uint sign = 0;
@@ -43,33 +43,33 @@ void Parser::isDigitStr(const std::string &str, uint &index_end)
 		i++;
 	if (i == sign || (str[i] != '\0' && str[i] != '#' && !std::isspace(str[i])))
 		throw Exception::ParserLight("Argument is not a valid number");
-	index_end = i;
+	indexEnd = i;
 }
 
 uint Parser::strtou(const std::string &str, size_t *index, uint max, uint min)
 {
 	unsigned long n;
-	uint          index_end;
+	uint          indexEnd;
 
-	this->isDigitStr(str, index_end);
-	std::string_view n_str(str.c_str(), index_end);
+	this->isDigitStr(str, indexEnd);
+	std::string_view nStr(str.c_str(), indexEnd);
 	try
 	{
 		n = std::stoi(str, index);
 	}
 	catch (const std::out_of_range &e)
 	{
-		throw Exception::ParserLight(catArgs(n_str, " is greater than ", max));
+		throw Exception::ParserLight(catArgs(nStr, " is greater than ", max));
 	}
 
 	if (n < min)
-		throw Exception::ParserLight(catArgs(n_str, " is lower than ", min));
+		throw Exception::ParserLight(catArgs(nStr, " is lower than ", min));
 	if (n > max)
 	{
 		if (str[0] == '-')
-			throw Exception::ParserLight(catArgs(n_str, " is lower than ", min));
+			throw Exception::ParserLight(catArgs(nStr, " is lower than ", min));
 		else
-			throw Exception::ParserLight(catArgs(n_str, " is greater than ", max));
+			throw Exception::ParserLight(catArgs(nStr, " is greater than ", max));
 	}
 
 	return static_cast<uint>(n);
