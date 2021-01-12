@@ -1,3 +1,4 @@
+#include "Array.class.hpp"
 #include "Exception.class.hpp"
 #include "Puzzle.class.hpp"
 #include "cat-args.template.hpp"
@@ -71,13 +72,13 @@ uint getPuzzleSize(const std::string &line, uint i, uint &colError)
 
 void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero, Puzzle &puzzle)
 {
-	uint                     size = puzzle.getSize();
-	static std::vector<bool> hashTable(size * size, false);
-	static uint              y = 0;
-	uint                     x = 0;
-	uint                     n;
-	size_t                   nbChars;
-	std::stringstream        errorStream;
+	uint               size = puzzle.getSize();
+	static Array<bool> hashTable(size * size, false);
+	static uint        y = 0;
+	uint               x = 0;
+	uint               n;
+	size_t             nbChars;
+	std::stringstream  errorStream;
 
 	for (; x < size; x++)
 	{
