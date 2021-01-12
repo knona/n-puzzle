@@ -1,6 +1,6 @@
 # N-puzzle
 
-## Dependencies
+## Dépendences
 
 ### Boost program_options
 
