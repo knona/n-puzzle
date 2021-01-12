@@ -1,7 +1,7 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
-#include "Puzzle.hpp"
+#include "Puzzle.class.hpp"
 
 typedef unsigned int uint;
 

@@ -1,6 +1,8 @@
-#include "Position.hpp"
-#include "Puzzle.hpp"
+#include "main.hpp"
 
+#include "Position.struct.hpp"
+
+#include <exception>
 #include <iostream>
 
 int main(int argc, char const *argv[])

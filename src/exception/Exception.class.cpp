@@ -1,4 +1,4 @@
-#include "Exception.hpp"
+#include "Exception.class.hpp"
 
 const char *Exception::GameOver::what() const throw()
 {
