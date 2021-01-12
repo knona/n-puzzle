@@ -2,7 +2,6 @@
 
 #include "cat-args.template.hpp"
 
-#include <cstring>
 #include <exception>
 #include <iomanip>
 
@@ -10,7 +9,8 @@ void Puzzle::init(uint size)
 {
 	this->_size = size;
 	this->_data = std::make_unique<uint[]>(size * size);
-	std::memset(this->_data.get(), 0, size * size * sizeof(uint));
+	for (uint i = 0; i < this->_size * this->_size; i++)
+		this->_data[i] = 0;
 }
 
 Puzzle::Puzzle()
@@ -40,7 +40,8 @@ Puzzle &Puzzle::operator=(const Puzzle &puzzle)
 	{
 		this->_data.reset();
 		init(puzzle._size);
-		std::memcpy(this->_data.get(), puzzle._data.get(), this->_size * this->_size * sizeof(uint));
+		for (uint i = 0; i < this->_size * this->_size; i++)
+			this->_data[i] = puzzle._data[i];
 	}
 	return *this;
 }
