@@ -5,7 +5,7 @@
 ### Boost program_options
 
 Facilite le parsing des différents arguments passés en ligne de commande.
-[Doc](https://www.boost.org/doc/libs/1_75_0/doc/html/program_options.html)
+[Documentation](https://www.boost.org/doc/libs/1_75_0/doc/html/program_options.html)
 
 - **MacOs**: `brew install boost`
 - **Debian-based distribution**: `apt install libboost-program-options-dev`
