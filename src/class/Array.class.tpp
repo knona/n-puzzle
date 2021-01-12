@@ -1,4 +1,8 @@
 template<typename T>
+Array<T>::Array(): _size(0), _data(nullptr)
+{}
+
+template<typename T>
 Array<T>::Array(uint size): _size(size), _data(std::make_unique<T[]>(size))
 {}
 
@@ -50,6 +54,12 @@ Array<T> &Array<T>::operator=(Array<T> &&array)
 template<typename T>
 Array<T>::~Array()
 {}
+
+template<typename T>
+uint Array<T>::getSize() const
+{
+	return this->_size;
+}
 
 template<typename T>
 const T &Array<T>::operator[](uint index) const

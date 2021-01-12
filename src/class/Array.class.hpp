@@ -14,7 +14,7 @@ class Array
 	std::unique_ptr<T[]> _data;
 
 	public:
-	Array() = delete;
+	Array();
 	Array(uint size);
 	Array(uint size, const T &value);
 	Array(const Array<T> &);
@@ -23,6 +23,7 @@ class Array
 	Array<T> &operator=(Array<T> &&);
 	~Array();
 
+	uint     getSize() const;
 	const T &operator[](uint index) const;
 	T &      operator[](uint index);
 };
