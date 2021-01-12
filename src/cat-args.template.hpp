@@ -1,5 +1,5 @@
-#ifndef CAT_ARGS_TPP
-#define CAT_ARGS_TPP
+#ifndef CAT_ARGS_HPP
+#define CAT_ARGS_HPP
 
 #include <sstream>
 
@@ -12,4 +12,4 @@ std::string catArgs(const Args &...args)
 	return sstream.str();
 }
 
-#endif // !CAT_ARGS_TPP
+#endif // !CAT_ARGS_HPP
