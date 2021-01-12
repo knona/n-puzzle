@@ -6,6 +6,7 @@
 #include "Puzzle.class.hpp"
 
 #include <fstream>
+#include <optional>
 #include <string>
 
 typedef unsigned int uint;
@@ -13,9 +14,8 @@ typedef unsigned int uint;
 class Parser
 {
 	private:
-	const char *  _file;
-	std::ifstream _fileStream;
-	std::istream &_stream;
+	const std::optional<std::string> &_file;
+	std::ifstream                     _fileStream;
 
 	Puzzle      _puzzle;
 	Array<bool> _hashTable;
@@ -25,7 +25,7 @@ class Parser
 
 	public:
 	Parser() = delete;
-	Parser(const char *file = nullptr);
+	Parser(const std::optional<std::string> &file);
 	Parser(const Parser &) = delete;
 	Parser &operator=(const Parser &) = delete;
 	Parser(Parser &&) = delete;
@@ -37,8 +37,8 @@ class Parser
 	                     uint min = 0);
 	void          setPuzzleSize(const std::string &line, uint &i);
 	void          setPuzzleRow(const std::string &line, uint &i);
-	void          parseFromStream(std::string &line);
-	std::istream &openFile();
+	void          parseFromStream(std::istream &stream, std::string &line);
+	std::istream &getInputStream();
 	void          closeFile();
 	void          parse();
 	Puzzle &      getPuzzle();

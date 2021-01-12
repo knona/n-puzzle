@@ -49,7 +49,7 @@ $(OBJS_DIRS):
 
 $(NAME): $(OBJS_DIRS) $(OBJS)
 	@printf "\033[2K\r$(BLUE)>>Linking...$(DEFAULT)"
-	@$(CC) -o $@ $(OBJS)
+	@$(CC) -o $@ $(OBJS) -lboost_program_options
 	@printf "\033[2K\r$(NAME) has been created $(GREEN)[OK]$(DEFAULT)\n"
 
 $(OBJS_MAIN_DIR)%.o: $(SRCS_MAIN_DIR)%.cpp $(HEADERS)

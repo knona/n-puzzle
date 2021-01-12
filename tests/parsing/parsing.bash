@@ -23,7 +23,7 @@ do
 	then
 		valgrind --leak-check=full -q ./n-puzzle $f
 	else
-		./n-puzzle $f
+		./n-puzzle --file=$f --parse-only
 	fi
 	if [ "$wait" == true ]
 	then

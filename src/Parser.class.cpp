@@ -6,7 +6,7 @@
 #include <exception>
 #include <iostream>
 
-Parser::Parser(const char *file): _file(file), _stream(file ? this->openFile() : std::cin), _rows(0), _pos { 1, 1 }
+Parser::Parser(const std::optional<std::string> &file): _file(file), _rows(0), _pos { 1, 1 }
 {}
 
 Parser::~Parser()
@@ -14,18 +14,20 @@ Parser::~Parser()
 	this->closeFile();
 }
 
-std::istream &Parser::openFile()
+std::istream &Parser::getInputStream()
 {
-	this->_fileStream.open(this->_file);
+	if (!this->_file.has_value())
+		return std::cin;
 
+	this->_fileStream.open(this->_file.value());
 	if (!this->_fileStream.is_open())
-		throw std::runtime_error(catArgs("File ", this->_file, " cannot be openned"));
+		throw std::runtime_error(catArgs("File ", this->_file.value(), " cannot be openned"));
 	return this->_fileStream;
 }
 
 void Parser::closeFile()
 {
-	if (this->_file)
+	if (this->_file.has_value() && this->_fileStream.is_open())
 		this->_fileStream.close();
 }
 
@@ -120,11 +122,11 @@ void Parser::setPuzzleRow(const std::string &line, uint &i)
 	this->_rows++;
 }
 
-void Parser::parseFromStream(std::string &line)
+void Parser::parseFromStream(std::istream &stream, std::string &line)
 {
 	uint i;
 
-	for (; std::getline(this->_stream, line); this->_pos.line++)
+	for (; std::getline(stream, line); this->_pos.line++)
 	{
 		for (i = 0; i < line.length() && std::isspace(line[i]); i++)
 			;
@@ -147,7 +149,7 @@ void Parser::parse()
 
 	try
 	{
-		this->parseFromStream(line);
+		this->parseFromStream(this->getInputStream(), line);
 	}
 	catch (const Exception::ParserLight &e)
 	{
@@ -155,6 +157,7 @@ void Parser::parse()
 			throw Exception::Parser(line, this->_pos, e.what());
 		throw;
 	}
+	this->closeFile();
 }
 
 Puzzle &Parser::getPuzzle()
