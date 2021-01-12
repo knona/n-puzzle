@@ -2,12 +2,13 @@
 #define PUZZLE_HPP
 
 #include "Position.struct.hpp"
-#include "main.hpp"
 
 #include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
+
+typedef unsigned int uint;
 
 class Puzzle
 {

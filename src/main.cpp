@@ -1,9 +1,11 @@
-#include "main.hpp"
-
+#include "Parser.class.hpp"
 #include "Position.struct.hpp"
+#include "Puzzle.class.hpp"
 
 #include <exception>
 #include <iostream>
+
+typedef unsigned int uint;
 
 int main(int argc, char const *argv[])
 {
@@ -13,10 +15,10 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	Puzzle puzzle;
+	Parser parser(argv[1]);
 	try
 	{
-		puzzle = parser(argv[1]);
+		parser.parse();
 	}
 	catch (const std::exception &e)
 	{
@@ -25,6 +27,6 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	std::cout << puzzle << std::endl;
+	std::cout << parser.getPuzzle() << std::endl;
 	return 0;
 }

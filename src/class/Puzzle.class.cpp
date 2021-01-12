@@ -10,7 +10,7 @@ void Puzzle::init(uint size)
 {
 	this->_size = size;
 	this->_data = std::make_unique<uint[]>(size * size);
-	std::memset(this->_data.get(), 0, size * size);
+	std::memset(this->_data.get(), 0, size * size * sizeof(uint));
 }
 
 Puzzle::Puzzle()
@@ -40,7 +40,7 @@ Puzzle &Puzzle::operator=(const Puzzle &puzzle)
 	{
 		this->_data.reset();
 		init(puzzle._size);
-		std::memcpy(this->_data.get(), puzzle._data.get(), this->_size * this->_size);
+		std::memcpy(this->_data.get(), puzzle._data.get(), this->_size * this->_size * sizeof(uint));
 	}
 	return *this;
 }

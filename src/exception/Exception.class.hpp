@@ -1,12 +1,13 @@
 #ifndef EXCEPTION_HPP
 #define EXCEPTION_HPP
 
-#include "main.hpp"
+#include "FilePosition.struct.hpp"
 
 #include <exception>
 #include <sstream>
 #include <string>
 
+typedef unsigned int uint;
 class Exception
 {
 	public:
@@ -22,7 +23,7 @@ class Exception
 	{
 		public:
 		Parser() = delete;
-		Parser(const std::string line, uint lineNb, uint col, const std::string &detail);
+		Parser(const std::string line, FilePosition pos, const std::string &detail);
 		virtual const char *what() const throw();
 	};
 
