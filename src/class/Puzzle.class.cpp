@@ -1,4 +1,6 @@
-#include "Puzzle.hpp"
+#include "Puzzle.class.hpp"
+
+#include "cat-args.template.hpp"
 
 #include <cstring>
 #include <exception>
@@ -75,36 +77,36 @@ const uint *Puzzle::operator[](uint index) const
 uint &Puzzle::at(uint a, uint b)
 {
 	if (a >= this->_size)
-		throw std::out_of_range(std::to_string(a) + " is out of range");
+		throw std::out_of_range(catArgs(a, " is out of range"));
 	if (b >= this->_size)
-		throw std::out_of_range(std::to_string(b) + " is out of range");
+		throw std::out_of_range(catArgs(b, " is out of range"));
 	return this->_data[a * this->_size + b];
 }
 
 uint Puzzle::at(uint a, uint b) const
 {
 	if (a >= this->_size)
-		throw std::out_of_range(std::to_string(a) + " is out of range");
+		throw std::out_of_range(catArgs(a, " is out of range"));
 	if (b >= this->_size)
-		throw std::out_of_range(std::to_string(b) + " is out of range");
+		throw std::out_of_range(catArgs(b, " is out of range"));
 	return this->_data[a * this->_size + b];
 }
 
 uint &Puzzle::at(Position pos)
 {
 	if (pos.x >= this->_size)
-		throw std::out_of_range(std::to_string(pos.x) + " is out of range");
+		throw std::out_of_range(catArgs(pos.x, " is out of range"));
 	if (pos.y >= this->_size)
-		throw std::out_of_range(std::to_string(pos.y) + " is out of range");
+		throw std::out_of_range(catArgs(pos.y, " is out of range"));
 	return this->_data[pos.y * this->_size + pos.x];
 }
 
 uint Puzzle::at(Position pos) const
 {
 	if (pos.x >= this->_size)
-		throw std::out_of_range(std::to_string(pos.x) + " is out of range");
+		throw std::out_of_range(catArgs(pos.x, " is out of range"));
 	if (pos.y >= this->_size)
-		throw std::out_of_range(std::to_string(pos.y) + " is out of range");
+		throw std::out_of_range(catArgs(pos.y, " is out of range"));
 	return this->_data[pos.y * this->_size + pos.x];
 }
 

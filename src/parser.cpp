@@ -1,5 +1,6 @@
-#include "Exception.hpp"
-#include "Puzzle.hpp"
+#include "Exception.class.hpp"
+#include "Puzzle.class.hpp"
+#include "cat-args.template.hpp"
 
 #include <exception>
 #include <fstream>
@@ -38,22 +39,17 @@ uint strtou(const std::string &str, size_t *index = nullptr, uint max = std::num
 	}
 	catch (const std::out_of_range &e)
 	{
-		errorStream << n_str << " is greater than " << max;
-		throw Exception::ParserLight(errorStream.str());
+		throw Exception::ParserLight(catArgs(n_str, " is greater than ", max));
 	}
 
 	if (n < min)
-	{
-		errorStream << n_str << " is lower than " << min;
-		throw Exception::ParserLight(errorStream.str());
-	}
+		throw Exception::ParserLight(catArgs(n_str, " is lower than ", min));
 	if (n > max)
 	{
 		if (str[0] == '-')
-			errorStream << n_str << " is lower than " << min;
+			throw Exception::ParserLight(catArgs(n_str, " is lower than ", min));
 		else
-			errorStream << n_str << " is greater than " << max;
-		throw Exception::ParserLight(errorStream.str());
+			throw Exception::ParserLight(catArgs(n_str, " is greater than ", max));
 	}
 
 	return static_cast<uint>(n);
@@ -88,7 +84,7 @@ void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero
 		colError = i;
 		n = strtou(line.c_str() + i, &nbChars, size * size - 1, 0);
 		if (size == y)
-			throw Exception::ParserLight("The number of lines does not match the given size", false);
+			throw Exception::ParserLight("The number of rows does not match the given size", false);
 		if (n == 0)
 		{
 			if (hasZero)
@@ -97,8 +93,7 @@ void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero
 		}
 		if (hashTable[n])
 			throw Exception::ParserLight("Number already set");
-		else
-			hashTable[n] = true;
+		hashTable[n] = true;
 		puzzle.at(y, x) = n;
 		for (i += nbChars; i < line.length() && std::isspace(line[i]); i++)
 			;
@@ -107,15 +102,9 @@ void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero
 	}
 	colError = i;
 	if (x + 1 < size)
-	{
-		errorStream << "Not enough arguments, " << size << " numbers are required";
-		throw Exception::ParserLight(errorStream.str());
-	}
+		throw Exception::ParserLight(catArgs("Not enough arguments, ", size, " numbers are required"));
 	if (x + 1 > size)
-	{
-		errorStream << "Too much arguments, " << size << " numbers are required";
-		throw Exception::ParserLight(errorStream.str());
-	}
+		throw Exception::ParserLight(catArgs("Too much arguments, ", size, " numbers are required"));
 	y++;
 }
 
@@ -147,7 +136,7 @@ Puzzle parserFromStream(std::istream &stream, std::string &line, uint &lineCount
 	if (puzzle.getSize() == 0)
 		throw Exception::ParserLight("Invalid file", false);
 	if (puzzle.getSize() != nbRows)
-		throw Exception::ParserLight("The number of lines does not match the given size", false);
+		throw Exception::ParserLight("The number of rows does not match the given size", false);
 	if (!hasZero)
 		throw Exception::ParserLight("A zero number is required", false);
 	return puzzle;
@@ -158,7 +147,7 @@ std::istream &streamFromFile(const char *file)
 	static std::ifstream stream(file);
 
 	if (!stream.is_open())
-		throw std::runtime_error(std::string("File ") + file + " cannot be openned");
+		throw std::runtime_error(catArgs("File ", file, " cannot be openned"));
 	return stream;
 }
 

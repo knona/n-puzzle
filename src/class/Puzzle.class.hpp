@@ -1,7 +1,7 @@
 #ifndef PUZZLE_HPP
 #define PUZZLE_HPP
 
-#include "Position.hpp"
+#include "Position.struct.hpp"
 #include "main.hpp"
 
 #include <iostream>
