@@ -70,7 +70,7 @@ uint getPuzzleSize(const std::string &line, uint i, uint &colError)
 	return n;
 }
 
-void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero, Puzzle &puzzle)
+void getPuzzleRow(const std::string &line, uint i, uint &colError, Puzzle &puzzle)
 {
 	uint               size = puzzle.getSize();
 	static Array<bool> hashTable(size * size, false);
@@ -86,12 +86,6 @@ void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero
 		n = strtou(line.c_str() + i, &nbChars, size * size - 1, 0);
 		if (size == y)
 			throw Exception::ParserLight("The number of rows does not match the given size", false);
-		if (n == 0)
-		{
-			if (hasZero)
-				throw Exception::ParserLight("Multiple zero numbers");
-			hasZero = true;
-		}
 		if (hashTable[n])
 			throw Exception::ParserLight("Number already set");
 		hashTable[n] = true;
@@ -112,34 +106,27 @@ void getPuzzleRow(const std::string &line, uint i, uint &colError, bool &hasZero
 Puzzle parserFromStream(std::istream &stream, std::string &line, uint &lineCount, uint &colError)
 {
 	Puzzle puzzle;
-	bool   hasZero = false;
 	uint   nbRows = 0;
 	uint   i;
 
-	while (std::getline(stream, line))
+	for (; std::getline(stream, line); lineCount++)
 	{
 		for (i = 0; i < line.length() && std::isspace(line[i]); i++)
 			;
 		if (i == line.length() || line[i] == '#')
-		{
-			lineCount++;
 			continue;
-		}
 		if (puzzle.getSize() == 0)
 			puzzle = Puzzle(getPuzzleSize(line, i, colError));
 		else
 		{
-			getPuzzleRow(line, i, colError, hasZero, puzzle);
+			getPuzzleRow(line, i, colError, puzzle);
 			nbRows++;
 		}
-		lineCount++;
 	}
 	if (puzzle.getSize() == 0)
 		throw Exception::ParserLight("Invalid file", false);
 	if (puzzle.getSize() != nbRows)
 		throw Exception::ParserLight("The number of rows does not match the given size", false);
-	if (!hasZero)
-		throw Exception::ParserLight("A zero number is required", false);
 	return puzzle;
 }
 
@@ -162,7 +149,7 @@ Puzzle parser(const char *file)
 {
 	std::istream &stream = file ? streamFromFile(file) : std::cin;
 	std::string   line;
-	uint          lineCount = 0;
+	uint          lineCount = 1;
 	uint          colError = 0;
 	Puzzle        puzzle;
 
