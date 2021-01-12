@@ -48,9 +48,8 @@ void Parser::isDigitStr(const std::string &str, uint &index_end)
 
 uint Parser::strtou(const std::string &str, size_t *index, uint max, uint min)
 {
-	unsigned long     n;
-	uint              index_end;
-	std::stringstream errorStream;
+	unsigned long n;
+	uint          index_end;
 
 	this->isDigitStr(str, index_end);
 	std::string_view n_str(str.c_str(), index_end);
