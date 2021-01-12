@@ -78,7 +78,6 @@ void getPuzzleRow(const std::string &line, uint i, uint &colError, Puzzle &puzzl
 	uint               x = 0;
 	uint               n;
 	size_t             nbChars;
-	std::stringstream  errorStream;
 
 	for (; x < size; x++)
 	{
