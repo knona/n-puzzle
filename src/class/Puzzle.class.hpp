@@ -1,6 +1,7 @@
 #ifndef PUZZLE_HPP
 #define PUZZLE_HPP
 
+#include "Move.enum.hpp"
 #include "Position.struct.hpp"
 
 #include <iostream>
@@ -15,6 +16,8 @@ class Puzzle
 	private:
 	uint                    _size;
 	std::unique_ptr<uint[]> _data;
+	Position                _emptyPos;
+	bool                    _isEmptyPosDefined;
 
 	void init(uint size);
 
@@ -35,8 +38,11 @@ class Puzzle
 	uint &      at(Position pos);
 	uint        at(Position pos) const;
 	void        print(std::ostream &os = std::cout) const;
+	void        setZeroPosition(const Position &pos);
+	void        setZeroPosition();
+	void        move(Move direction);
 };
 
-std::ostream &operator<<(std::ostream &os, Puzzle &puz);
+std::ostream &operator<<(std::ostream &os, const Puzzle &puz);
 
 #endif // !PUZZLE_HPP

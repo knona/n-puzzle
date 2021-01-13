@@ -1,8 +1,3 @@
-#ifndef CAT_ARGS_HPP
-#define CAT_ARGS_HPP
-
-#include <sstream>
-
 template<typename... Args>
 std::string catArgs(const Args &...args)
 {
@@ -12,4 +7,12 @@ std::string catArgs(const Args &...args)
 	return sstream.str();
 }
 
-#endif // !CAT_ARGS_HPP
+template<typename T>
+void swap(T &a, T &b)
+{
+	T tmp;
+
+	tmp = a;
+	a = b;
+	b = tmp;
+}

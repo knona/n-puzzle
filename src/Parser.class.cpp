@@ -1,7 +1,7 @@
 #include "Parser.class.hpp"
 
 #include "Exception.class.hpp"
-#include "cat-args.template.hpp"
+#include "utils.hpp"
 
 #include <exception>
 #include <iostream>
@@ -109,6 +109,8 @@ void Parser::setPuzzleRow(const std::string &line, uint &i)
 			throw Exception::ParserLight("Number already set");
 		this->_hashTable[n] = true;
 		this->_puzzle.at(this->_rows, cols) = n;
+		if (n == 0)
+			this->_puzzle.setZeroPosition({ _rows, cols });
 		for (i += nbChars; i < line.length() && std::isspace(line[i]); i++)
 			;
 		if (i == line.length() || line[i] == '#')

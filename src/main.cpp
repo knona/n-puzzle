@@ -2,12 +2,13 @@
 #include "Parser.class.hpp"
 #include "Position.struct.hpp"
 #include "Puzzle.class.hpp"
-#include "cat-args.template.hpp"
+#include "utils.hpp"
 
 #include <boost/program_options.hpp>
 #include <exception>
 #include <iostream>
 #include <optional>
+#include <sstream>
 
 typedef unsigned int uint;
 

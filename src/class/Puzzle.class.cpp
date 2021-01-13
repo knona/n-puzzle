@@ -1,6 +1,6 @@
 #include "Puzzle.class.hpp"
 
-#include "cat-args.template.hpp"
+#include "utils.hpp"
 
 #include <exception>
 #include <iomanip>
@@ -13,13 +13,10 @@ void Puzzle::init(uint size)
 		this->_data[i] = 0;
 }
 
-Puzzle::Puzzle()
-{
-	this->_size = 0;
-	this->_data = nullptr;
-}
+Puzzle::Puzzle(): _size(0), _data(nullptr), _isEmptyPosDefined(false)
+{}
 
-Puzzle::Puzzle(uint size)
+Puzzle::Puzzle(uint size): _isEmptyPosDefined(false)
 {
 	this->init(size);
 }
@@ -40,6 +37,8 @@ Puzzle &Puzzle::operator=(const Puzzle &puzzle)
 	{
 		this->_data.reset();
 		init(puzzle._size);
+		this->_emptyPos = puzzle._emptyPos;
+		this->_isEmptyPosDefined = puzzle._isEmptyPosDefined;
 		for (uint i = 0; i < this->_size * this->_size; i++)
 			this->_data[i] = puzzle._data[i];
 	}
@@ -52,6 +51,8 @@ Puzzle &Puzzle::operator=(Puzzle &&puzzle)
 	{
 		this->_data.reset();
 		this->_size = puzzle._size;
+		this->_emptyPos = puzzle._emptyPos;
+		this->_isEmptyPosDefined = puzzle._isEmptyPosDefined;
 		this->_data = std::move(puzzle._data);
 	}
 	return *this;
@@ -128,8 +129,64 @@ void Puzzle::print(std::ostream &os) const
 	}
 }
 
-std::ostream &operator<<(std::ostream &os, Puzzle &puz)
+void Puzzle::setZeroPosition(const Position &pos)
+{
+	this->_emptyPos = pos;
+	this->_isEmptyPosDefined = true;
+}
+
+void Puzzle::setZeroPosition()
+{
+	for (uint i = 0; i < this->_size * this->_size; i++)
+	{
+		if (this->_data[i] == 0)
+		{
+			this->_emptyPos.y = i / this->_size;
+			this->_emptyPos.x = i % this->_size;
+			this->_isEmptyPosDefined = true;
+			break;
+		}
+	}
+	throw std::logic_error("0 value not found to define empty position");
+}
+
+std::ostream &operator<<(std::ostream &os, const Puzzle &puz)
 {
 	puz.print(os);
 	return os;
+}
+
+void Puzzle::move(Move direction)
+{
+	if (!this->_isEmptyPosDefined)
+		throw std::logic_error("Cannot move, empty position is not set");
+
+	Position newPos = this->_emptyPos;
+
+	if (direction == Move::Top)
+	{
+		newPos.y++;
+		if (newPos.y == this->_size)
+			throw std::logic_error(catArgs("Cannot move top from position:\n", this->_emptyPos));
+	}
+	else if (direction == Move::Right)
+	{
+		newPos.x--;
+		if (newPos.x == std::numeric_limits<uint>::max())
+			throw std::logic_error(catArgs("Cannot move right from position:\n", this->_emptyPos));
+	}
+	else if (direction == Move::Bottom)
+	{
+		newPos.y--;
+		if (newPos.y == std::numeric_limits<uint>::max())
+			throw std::logic_error(catArgs("Cannot move bottom from position:\n", this->_emptyPos));
+	}
+	else if (direction == Move::Left)
+	{
+		newPos.x++;
+		if (newPos.x == this->_size)
+			throw std::logic_error(catArgs("Cannot move left from position:\n", this->_emptyPos));
+	}
+	swap(this->at(this->_emptyPos), this->at(newPos));
+	this->_emptyPos = newPos;
 }
