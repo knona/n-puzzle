@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -30,20 +31,29 @@ class Puzzle
 	Puzzle &operator=(Puzzle &&);
 	~Puzzle();
 
-	uint        getSize() const;
-	uint *      operator[](uint index);
-	const uint *operator[](uint index) const;
-	uint &      at(uint a, uint b);
-	uint        at(uint a, uint b) const;
-	uint &      at(Position pos);
-	uint        at(Position pos) const;
-	void        print(std::ostream &os = std::cout) const;
-	void        setZeroPosition(const Position &pos);
-	void        setZeroPosition();
-	void        move(Move direction);
+	uint                  getSize() const;
+	uint &                operator[](uint index);
+	uint                  operator[](uint index) const;
+	uint &                at(uint a, uint b);
+	uint                  at(uint a, uint b) const;
+	uint &                at(Position pos);
+	uint                  at(Position pos) const;
+	void                  print(std::ostream &os = std::cout, bool displaySize = false) const;
+	void                  setZeroPosition(const Position &pos);
+	void                  setZeroPosition();
+	void                  move(Move direction);
+	std::optional<Puzzle> moveAndRet(Move direction) const;
+	std::vector<Puzzle>   getChildren() const;
 
 	bool operator==(const Puzzle &) const;
 	bool operator!=(const Puzzle &) const;
+
+	struct HashFunction
+	{
+		size_t operator()(const Puzzle &puzzle) const;
+	};
+
+	static Puzzle getFinalState(uint size);
 };
 
 std::ostream &operator<<(std::ostream &os, const Puzzle &puz);

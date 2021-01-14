@@ -2,6 +2,8 @@
 
 #include "utils.hpp"
 
+#include <boost/functional/hash.hpp>
+#include <cstdio>
 #include <exception>
 #include <iomanip>
 
@@ -66,32 +68,36 @@ uint Puzzle::getSize() const
 	return this->_size;
 }
 
-uint *Puzzle::operator[](uint index)
+uint &Puzzle::operator[](uint index)
 {
-	return this->_data.get() + this->_size * index;
+	if (index >= this->_size * this->_size)
+		throw std::out_of_range(catArgs(index, " is out of range"));
+	return this->_data[index];
 }
 
-const uint *Puzzle::operator[](uint index) const
+uint Puzzle::operator[](uint index) const
 {
-	return this->_data.get() + this->_size * index;
+	if (index >= this->_size * this->_size)
+		throw std::out_of_range(catArgs(index, " is out of range"));
+	return this->_data[index];
 }
 
-uint &Puzzle::at(uint a, uint b)
+uint &Puzzle::at(uint y, uint x)
 {
-	if (a >= this->_size)
-		throw std::out_of_range(catArgs(a, " is out of range"));
-	if (b >= this->_size)
-		throw std::out_of_range(catArgs(b, " is out of range"));
-	return this->_data[a * this->_size + b];
+	if (y >= this->_size)
+		throw std::out_of_range(catArgs(y, " is out of range"));
+	if (x >= this->_size)
+		throw std::out_of_range(catArgs(x, " is out of range"));
+	return this->_data[y * this->_size + x];
 }
 
-uint Puzzle::at(uint a, uint b) const
+uint Puzzle::at(uint y, uint x) const
 {
-	if (a >= this->_size)
-		throw std::out_of_range(catArgs(a, " is out of range"));
-	if (b >= this->_size)
-		throw std::out_of_range(catArgs(b, " is out of range"));
-	return this->_data[a * this->_size + b];
+	if (y >= this->_size)
+		throw std::out_of_range(catArgs(y, " is out of range"));
+	if (x >= this->_size)
+		throw std::out_of_range(catArgs(x, " is out of range"));
+	return this->_data[y * this->_size + x];
 }
 
 uint &Puzzle::at(Position pos)
@@ -112,11 +118,12 @@ uint Puzzle::at(Position pos) const
 	return this->_data[pos.y * this->_size + pos.x];
 }
 
-void Puzzle::print(std::ostream &os) const
+void Puzzle::print(std::ostream &os, bool displaySize) const
 {
 	uint width = std::to_string(this->_size * this->_size - 1).length();
 
-	os << this->_size << std::endl;
+	if (displaySize)
+		os << this->_size << std::endl;
 	for (uint i = 0; i < this->_size; i++)
 	{
 		for (uint j = 0; j < this->_size; j++)
@@ -187,8 +194,45 @@ void Puzzle::move(Move direction)
 		if (newPos.x == this->_size)
 			throw std::logic_error(catArgs("Cannot move left from position:\n", this->_emptyPos));
 	}
-	swap(this->at(this->_emptyPos), this->at(newPos));
+	mySwap(this->at(this->_emptyPos), this->at(newPos));
 	this->_emptyPos = newPos;
+}
+
+std::optional<Puzzle> Puzzle::moveAndRet(Move direction) const
+{
+	if (!this->_isEmptyPosDefined)
+		throw std::logic_error("Cannot move, empty position is not set");
+
+	Position newPos = this->_emptyPos;
+
+	if (direction == Move::Top)
+	{
+		newPos.y++;
+		if (newPos.y == this->_size)
+			return {};
+	}
+	else if (direction == Move::Right)
+	{
+		newPos.x--;
+		if (newPos.x == std::numeric_limits<uint>::max())
+			return {};
+	}
+	else if (direction == Move::Bottom)
+	{
+		newPos.y--;
+		if (newPos.y == std::numeric_limits<uint>::max())
+			return {};
+	}
+	else if (direction == Move::Left)
+	{
+		newPos.x++;
+		if (newPos.x == this->_size)
+			return {};
+	}
+	Puzzle newPuzzle(*this);
+	mySwap(newPuzzle.at(newPuzzle._emptyPos), newPuzzle.at(newPos));
+	newPuzzle._emptyPos = newPos;
+	return newPuzzle;
 }
 
 bool Puzzle::operator==(const Puzzle &puzzle) const
@@ -201,4 +245,67 @@ bool Puzzle::operator==(const Puzzle &puzzle) const
 bool Puzzle::operator!=(const Puzzle &puzzle) const
 {
 	return !(*this == puzzle);
+}
+
+// works only for size <= 4
+size_t Puzzle::HashFunction::operator()(const Puzzle &puzzle) const
+{
+	size_t seed = 0;
+
+	for (uint i = 0; i < puzzle._size * puzzle._size; i++)
+		seed |= static_cast<size_t>(puzzle[i]) << (4 * i);
+
+	return seed;
+}
+
+Puzzle Puzzle::getFinalState(uint size)
+{
+	Puzzle ret(size);
+
+	uint dir = 0;
+	uint nb = size;
+	uint v = 1;
+
+	int x = -1, y = 0;
+	while (v != size * size)
+	{
+		for (uint i = nb == size || nb == 1 ? 1 : 0; i < 2; i++)
+		{
+			for (uint j = 0; j < nb; j++)
+			{
+				if (dir == 0)
+					x++;
+				if (dir == 1)
+					y++;
+				if (dir == 2)
+					x--;
+				if (dir == 3)
+					y--;
+				ret.at(y, x) = v;
+				v++;
+			}
+			dir = (dir + 1) % 4;
+		}
+		nb--;
+	}
+
+	return ret;
+}
+
+std::vector<Puzzle> Puzzle::getChildren() const
+{
+	std::vector<Puzzle> vec;
+
+	for (uint i = 0; i < 4; i++)
+	{
+		try
+		{
+			std::optional<Puzzle> puzzle = this->moveAndRet(static_cast<Move>(i));
+			if (puzzle.has_value())
+				vec.push_back(puzzle.value());
+		}
+		catch (const std::exception &e)
+		{}
+	}
+	return vec;
 }
