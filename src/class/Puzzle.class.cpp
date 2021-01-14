@@ -190,3 +190,15 @@ void Puzzle::move(Move direction)
 	swap(this->at(this->_emptyPos), this->at(newPos));
 	this->_emptyPos = newPos;
 }
+
+bool Puzzle::operator==(const Puzzle &puzzle) const
+{
+	for (uint i = 0; i < this->_size * this->_size; i++)
+		if (this->_data[i] != puzzle._data[i])
+			return false;
+	return true;
+}
+bool Puzzle::operator!=(const Puzzle &puzzle) const
+{
+	return !(*this == puzzle);
+}

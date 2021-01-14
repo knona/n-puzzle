@@ -41,6 +41,9 @@ class Puzzle
 	void        setZeroPosition(const Position &pos);
 	void        setZeroPosition();
 	void        move(Move direction);
+
+	bool operator==(const Puzzle &) const;
+	bool operator!=(const Puzzle &) const;
 };
 
 std::ostream &operator<<(std::ostream &os, const Puzzle &puz);
