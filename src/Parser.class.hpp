@@ -8,6 +8,7 @@
 #include <fstream>
 #include <optional>
 #include <string>
+#include <unordered_set>
 
 typedef unsigned int uint;
 
@@ -17,8 +18,8 @@ class Parser
 	const std::optional<std::string> &_file;
 	std::ifstream                     _fileStream;
 
-	Puzzle      _puzzle;
-	Array<bool> _hashTable;
+	Puzzle                   _puzzle;
+	std::unordered_set<uint> _hashTable;
 
 	uint         _rows;
 	FilePosition _pos;

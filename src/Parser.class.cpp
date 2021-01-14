@@ -89,7 +89,6 @@ void Parser::setPuzzleSize(const std::string &line, uint &i)
 	if (i != line.length() && line[i] != '#')
 		throw Exception::ParserLight("Puzzle's size is required", false);
 	this->_puzzle = Puzzle(n);
-	this->_hashTable = Array(n * n, false);
 }
 
 void Parser::setPuzzleRow(const std::string &line, uint &i)
@@ -105,9 +104,9 @@ void Parser::setPuzzleRow(const std::string &line, uint &i)
 	{
 		this->_pos.col = i;
 		n = this->strtou(line.c_str() + i, &nbChars, size * size - 1, 0);
-		if (this->_hashTable[n])
+		auto [it, isNewElement] = this->_hashTable.insert(n);
+		if (!isNewElement)
 			throw Exception::ParserLight("Number already set");
-		this->_hashTable[n] = true;
 		this->_puzzle.at(this->_rows, cols) = n;
 		if (n == 0)
 			this->_puzzle.setZeroPosition({ _rows, cols });
