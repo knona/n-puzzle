@@ -2,10 +2,10 @@
 
 #include "utils.hpp"
 
-#include <boost/functional/hash.hpp>
 #include <cstdio>
 #include <exception>
 #include <iomanip>
+#include <utility>
 
 void Puzzle::init(int size)
 {
@@ -150,6 +150,12 @@ void Puzzle::print(std::ostream &os, bool displaySize) const
 	}
 }
 
+std::ostream &operator<<(std::ostream &os, const Puzzle &puz)
+{
+	puz.print(os);
+	return os;
+}
+
 void Puzzle::setZeroPosition(const Position &pos)
 {
 	this->_emptyPos = pos;
@@ -160,7 +166,7 @@ void Puzzle::setZeroPosition()
 {
 	for (int i = 0; i < this->_size * this->_size; i++)
 	{
-		if (this->_data[i] == 0)
+		if ((*this)[i] == 0)
 		{
 			this->_emptyPos.y = i / this->_size;
 			this->_emptyPos.x = i % this->_size;
@@ -171,10 +177,16 @@ void Puzzle::setZeroPosition()
 	throw std::logic_error("0 value not found to define empty position");
 }
 
-std::ostream &operator<<(std::ostream &os, const Puzzle &puz)
+bool Puzzle::operator==(const Puzzle &puzzle) const
 {
-	puz.print(os);
-	return os;
+	for (int i = 0; i < this->_size * this->_size; i++)
+		if ((*this)[i] != puzzle[i])
+			return false;
+	return true;
+}
+bool Puzzle::operator!=(const Puzzle &puzzle) const
+{
+	return !(*this == puzzle);
 }
 
 void Puzzle::move(Move direction)
@@ -185,34 +197,21 @@ void Puzzle::move(Move direction)
 	Position newPos = this->_emptyPos;
 
 	if (direction == Move::Top)
-	{
 		newPos.y++;
-		if (newPos.y >= this->_size)
-			throw std::logic_error(catArgs("Cannot move top from position:\n", this->_emptyPos));
-	}
 	else if (direction == Move::Right)
-	{
 		newPos.x--;
-		if (newPos.x < 0)
-			throw std::logic_error(catArgs("Cannot move right from position:\n", this->_emptyPos));
-	}
 	else if (direction == Move::Bottom)
-	{
 		newPos.y--;
-		if (newPos.y < 0)
-			throw std::logic_error(catArgs("Cannot move bottom from position:\n", this->_emptyPos));
-	}
 	else if (direction == Move::Left)
-	{
 		newPos.x++;
-		if (newPos.x >= this->_size)
-			throw std::logic_error(catArgs("Cannot move left from position:\n", this->_emptyPos));
-	}
-	mySwap(this->at(this->_emptyPos), this->at(newPos));
+
+	if (newPos.y >= this->_size || newPos.y < 0 || newPos.x >= this->_size || newPos.x < 0)
+		throw std::logic_error(catArgs("Cannot move from position:\n", this->_emptyPos, "\nto\n", newPos));
+	std::swap(this->at(this->_emptyPos), this->at(newPos));
 	this->_emptyPos = newPos;
 }
 
-std::optional<Puzzle> Puzzle::moveAndRet(Move direction) const
+std::optional<Puzzle> Puzzle::getMovedPuzzle(Move direction) const
 {
 	if (!this->_isEmptyPosDefined)
 		throw std::logic_error("Cannot move, empty position is not set");
@@ -220,68 +219,42 @@ std::optional<Puzzle> Puzzle::moveAndRet(Move direction) const
 	Position newPos = this->_emptyPos;
 
 	if (direction == Move::Top)
-	{
 		newPos.y++;
-		if (newPos.y >= this->_size)
-			return {};
-	}
 	else if (direction == Move::Right)
-	{
 		newPos.x--;
-		if (newPos.x < 0)
-			return {};
-	}
 	else if (direction == Move::Bottom)
-	{
 		newPos.y--;
-		if (newPos.y < 0)
-			return {};
-	}
 	else if (direction == Move::Left)
-	{
 		newPos.x++;
-		if (newPos.x >= this->_size)
-			return {};
-	}
+
+	if (newPos.y >= this->_size || newPos.y < 0 || newPos.x >= this->_size || newPos.x < 0)
+		return {};
+
 	Puzzle newPuzzle(*this);
-	mySwap(newPuzzle.at(newPuzzle._emptyPos), newPuzzle.at(newPos));
+	std::swap(newPuzzle.at(newPuzzle._emptyPos), newPuzzle.at(newPos));
 	newPuzzle._emptyPos = newPos;
 	return newPuzzle;
 }
 
-bool Puzzle::operator==(const Puzzle &puzzle) const
+std::vector<Puzzle> Puzzle::getChildren() const
 {
-	for (int i = 0; i < this->_size * this->_size; i++)
-		if (this->_data[i] != puzzle._data[i])
-			return false;
-	return true;
-}
-bool Puzzle::operator!=(const Puzzle &puzzle) const
-{
-	return !(*this == puzzle);
-}
+	std::vector<Puzzle> children;
 
-// works only for size <= 4
-size_t Puzzle::HashFunction::operator()(const Puzzle &puzzle) const
-{
-	size_t seed = 0;
-
-	for (int i = 0; i < puzzle._size * puzzle._size; i++)
-		seed |= static_cast<size_t>(puzzle[i]) << (4 * i);
-
-	return seed;
+	for (int i = 0; i < 4; i++)
+	{
+		std::optional<Puzzle> puzzle = this->getMovedPuzzle(static_cast<Move>(i));
+		if (puzzle.has_value())
+			children.push_back(std::move(puzzle.value()));
+	}
+	return children;
 }
 
-Puzzle Puzzle::getFinalState(int size)
+Puzzle Puzzle::getGoal(int size)
 {
-	Puzzle ret(size);
+	Puzzle goal(size);
+	int    dir = 0, nb = size, v = 1, x = -1, y = 0;
 
-	uint dir = 0;
-	int  nb = size;
-	int  v = 1;
-
-	int x = -1, y = 0;
-	while (v != size * size)
+	for (; v != size * size; nb--)
 	{
 		for (int i = nb == size || nb == 1 ? 1 : 0; i < 2; i++)
 		{
@@ -295,31 +268,22 @@ Puzzle Puzzle::getFinalState(int size)
 					x--;
 				if (dir == 3)
 					y--;
-				ret.at(y, x) = v;
+				goal.at(y, x) = v;
 				v++;
 			}
 			dir = (dir + 1) % 4;
 		}
-		nb--;
 	}
-
-	return ret;
+	return goal;
 }
 
-std::vector<Puzzle> Puzzle::getChildren() const
+// works only for size <= 4
+size_t Puzzle::HashFunction::operator()(const Puzzle &puzzle) const
 {
-	std::vector<Puzzle> vec;
+	size_t seed = 0;
 
-	for (int i = 0; i < 4; i++)
-	{
-		try
-		{
-			std::optional<Puzzle> puzzle = this->moveAndRet(static_cast<Move>(i));
-			if (puzzle.has_value())
-				vec.push_back(puzzle.value());
-		}
-		catch (const std::exception &e)
-		{}
-	}
-	return vec;
+	for (int i = 0; i < puzzle._size * puzzle._size; i++)
+		seed |= static_cast<size_t>(puzzle[i]) << (4 * i);
+
+	return seed;
 }

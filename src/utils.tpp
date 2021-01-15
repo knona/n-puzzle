@@ -6,13 +6,3 @@ std::string catArgs(const Args &...args)
 	(sstream << ... << args);
 	return sstream.str();
 }
-
-template<typename T>
-void mySwap(T &a, T &b)
-{
-	T tmp;
-
-	tmp = a;
-	a = b;
-	b = tmp;
-}

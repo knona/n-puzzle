@@ -6,9 +6,6 @@
 template<typename... Args>
 std::string catArgs(const Args &...args);
 
-template<typename T>
-void mySwap(T &a, T &b);
-
 #include "utils.tpp"
 
 #endif // !UTILS_HPP

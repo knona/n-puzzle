@@ -40,22 +40,21 @@ class Puzzle
 	int                   at(int y, int x) const;
 	int &                 at(Position pos);
 	int                   at(Position pos) const;
+	bool                  operator==(const Puzzle &) const;
+	bool                  operator!=(const Puzzle &) const;
 	void                  print(std::ostream &os = std::cout, bool displaySize = false) const;
 	void                  setZeroPosition(const Position &pos);
 	void                  setZeroPosition();
 	void                  move(Move direction);
-	std::optional<Puzzle> moveAndRet(Move direction) const;
+	std::optional<Puzzle> getMovedPuzzle(Move direction) const;
 	std::vector<Puzzle>   getChildren() const;
 
-	bool operator==(const Puzzle &) const;
-	bool operator!=(const Puzzle &) const;
+	static Puzzle getGoal(int size);
 
 	struct HashFunction
 	{
 		size_t operator()(const Puzzle &puzzle) const;
 	};
-
-	static Puzzle getFinalState(int size);
 };
 
 std::ostream &operator<<(std::ostream &os, const Puzzle &puz);

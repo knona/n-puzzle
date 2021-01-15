@@ -94,8 +94,8 @@ int h(const Puzzle &puzzle)
 	{
 		for (int x = 0; x < size; x++)
 		{
-			int cost = getCost(arr[puzzle.at(y, x)], { y, x });
-			total += cost;
+			Position &pos = arr[puzzle.at(y, x)];
+			total += std::abs(pos.y - y) + abs(pos.x - x);
 		}
 	}
 	return total;
@@ -145,7 +145,7 @@ class MyQueue: public std::priority_queue<Puzzle, std::vector<Puzzle>, Compare>
 void init(int size)
 {
 	arr = Array<Position>(size * size);
-	goal = Puzzle::getFinalState(size);
+	goal = Puzzle::getGoal(size);
 	for (int y = 0; y < size; y++)
 		for (int x = 0; x < size; x++)
 			arr[goal.at(y, x)] = { y, x };
@@ -157,7 +157,7 @@ Puzzle process(Puzzle &start, const Options &options)
 	std::unordered_set<Puzzle, Puzzle::HashFunction> closed;
 
 	init(start.getSize());
-	Puzzle finalSate = Puzzle::getFinalState(start.getSize());
+	Puzzle finalSate = Puzzle::getGoal(start.getSize());
 	gScore[start] = 0;
 	opened.push(start);
 
@@ -188,18 +188,15 @@ Puzzle process(Puzzle &start, const Options &options)
 				opened.push(child);
 				// predecesseor(s) <- e
 			}
-			else
+			else if (gScore[child] > gScore[current] + 1)
 			{
-				if (gScore[child] > gScore[current] + 1)
+				gScore[child] = gScore[current] + 1;
+				// predecesseor(s) <- e
+				if (foundInClosed)
 				{
-					gScore[child] = gScore[current] + 1;
-					// predecesseor(s) <- e
-					if (foundInClosed)
-					{
-						// std::cout << h(child) << " " << gScore[child] << std::endl;
-						closed.erase(child);
-						opened.push(child);
-					}
+					// std::cout << h(child) << " " << gScore[child] << std::endl;
+					closed.erase(child);
+					opened.push(child);
 				}
 			}
 		}
