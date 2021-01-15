@@ -10,18 +10,16 @@
 #include <string>
 #include <unordered_set>
 
-typedef unsigned int uint;
-
 class Parser
 {
 	private:
 	const std::optional<std::string> &_file;
 	std::ifstream                     _fileStream;
 
-	Puzzle                   _puzzle;
-	std::unordered_set<uint> _hashTable;
+	Puzzle                  _puzzle;
+	std::unordered_set<int> _hashTable;
 
-	uint         _rows;
+	int          _rows;
 	FilePosition _pos;
 
 	public:
@@ -33,11 +31,11 @@ class Parser
 	Parser &operator=(Parser &&) = delete;
 	~Parser();
 
-	void          isDigitStr(const std::string &str, uint &index_end);
-	uint          strtou(const std::string &str, size_t *index = nullptr, uint max = std::numeric_limits<uint>::max(),
-	                     uint min = 0);
-	void          setPuzzleSize(const std::string &line, uint &i);
-	void          setPuzzleRow(const std::string &line, uint &i);
+	void          isDigitStr(const std::string &str, int &index_end);
+	int           strtoint(const std::string &str, size_t *index = nullptr, int max = std::numeric_limits<int>::max(),
+	                       int min = 0);
+	void          setPuzzleSize(const std::string &line, int &i);
+	void          setPuzzleRow(const std::string &line, int &i);
 	void          parseFromStream(std::istream &stream, std::string &line);
 	std::istream &getInputStream();
 	void          closeFile();

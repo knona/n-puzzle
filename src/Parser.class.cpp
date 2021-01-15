@@ -31,27 +31,27 @@ void Parser::closeFile()
 		this->_fileStream.close();
 }
 
-void Parser::isDigitStr(const std::string &str, uint &indexEnd)
+void Parser::isDigitStr(const std::string &str, int &indexEnd)
 {
-	uint i = 0;
-	uint sign = 0;
+	int i = 0;
+	int sign = 0;
 
 	if (str[i] == '+' || str[i] == '-')
 	{
 		sign = 1;
 		i++;
 	}
-	while (i < str.length() && str[i] >= '0' && str[i] <= '9')
+	while (i < static_cast<int>(str.length()) && str[i] >= '0' && str[i] <= '9')
 		i++;
 	if (i == sign || (str[i] != '\0' && str[i] != '#' && !std::isspace(str[i])))
 		throw Exception::ParserLight("Argument is not a valid number");
 	indexEnd = i;
 }
 
-uint Parser::strtou(const std::string &str, size_t *index, uint max, uint min)
+int Parser::strtoint(const std::string &str, size_t *index, int max, int min)
 {
-	unsigned long n;
-	uint          indexEnd;
+	int n;
+	int indexEnd;
 
 	this->isDigitStr(str, indexEnd);
 	std::string_view nStr(str.c_str(), indexEnd);
@@ -61,41 +61,39 @@ uint Parser::strtou(const std::string &str, size_t *index, uint max, uint min)
 	}
 	catch (const std::out_of_range &e)
 	{
-		throw Exception::ParserLight(catArgs(nStr, " is greater than ", max));
-	}
-
-	if (n < min)
-		throw Exception::ParserLight(catArgs(nStr, " is lower than ", min));
-	if (n > max)
-	{
 		if (str[0] == '-')
 			throw Exception::ParserLight(catArgs(nStr, " is lower than ", min));
 		else
 			throw Exception::ParserLight(catArgs(nStr, " is greater than ", max));
 	}
 
-	return static_cast<uint>(n);
+	if (n < min)
+		throw Exception::ParserLight(catArgs(nStr, " is lower than ", min));
+	if (n > max)
+		throw Exception::ParserLight(catArgs(nStr, " is greater than ", max));
+
+	return n;
 }
 
-void Parser::setPuzzleSize(const std::string &line, uint &i)
+void Parser::setPuzzleSize(const std::string &line, int &i)
 {
 	size_t nbChars;
-	uint   n;
+	int    size;
 
 	this->_pos.col = i;
-	n = this->strtou(line.c_str() + i, &nbChars, 100, 3);
-	for (i += nbChars; i < line.length() && std::isspace(line[i]); i++)
+	size = static_cast<int>(this->strtoint(line.c_str() + i, &nbChars, 4, 3));
+	for (i += nbChars; i < static_cast<int>(line.length()) && std::isspace(line[i]); i++)
 		;
-	if (i != line.length() && line[i] != '#')
+	if (i != static_cast<int>(line.length()) && line[i] != '#')
 		throw Exception::ParserLight("Puzzle's size is required", false);
-	this->_puzzle = Puzzle(n);
+	this->_puzzle = Puzzle(size);
 }
 
-void Parser::setPuzzleRow(const std::string &line, uint &i)
+void Parser::setPuzzleRow(const std::string &line, int &i)
 {
-	uint   cols = 0;
-	uint   n;
-	uint   size = this->_puzzle.getSize();
+	int    cols = 0;
+	int    n;
+	int    size = this->_puzzle.getSize();
 	size_t nbChars;
 
 	if (size == this->_rows)
@@ -103,16 +101,16 @@ void Parser::setPuzzleRow(const std::string &line, uint &i)
 	for (; cols < size; cols++)
 	{
 		this->_pos.col = i;
-		n = this->strtou(line.c_str() + i, &nbChars, size * size - 1, 0);
+		n = this->strtoint(line.c_str() + i, &nbChars, size * size - 1, 0);
 		auto [it, isNewElement] = this->_hashTable.insert(n);
 		if (!isNewElement)
 			throw Exception::ParserLight("Number already set");
 		this->_puzzle.at(this->_rows, cols) = n;
 		if (n == 0)
 			this->_puzzle.setZeroPosition({ _rows, cols });
-		for (i += nbChars; i < line.length() && std::isspace(line[i]); i++)
+		for (i += nbChars; i < static_cast<int>(line.length()) && std::isspace(line[i]); i++)
 			;
-		if (i == line.length() || line[i] == '#')
+		if (i == static_cast<int>(line.length()) || line[i] == '#')
 			break;
 	}
 	this->_pos.col = i;
@@ -125,13 +123,13 @@ void Parser::setPuzzleRow(const std::string &line, uint &i)
 
 void Parser::parseFromStream(std::istream &stream, std::string &line)
 {
-	uint i;
+	int i;
 
 	for (; std::getline(stream, line); this->_pos.line++)
 	{
-		for (i = 0; i < line.length() && std::isspace(line[i]); i++)
+		for (i = 0; i < static_cast<int>(line.length()) && std::isspace(line[i]); i++)
 			;
-		if (i == line.length() || line[i] == '#')
+		if (i == static_cast<int>(line.length()) || line[i] == '#')
 			continue;
 		if (this->_puzzle.getSize() == 0)
 			this->setPuzzleSize(line, i);
