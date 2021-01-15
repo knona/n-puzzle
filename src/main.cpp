@@ -1,3 +1,4 @@
+#include "Heuristic.class.hpp"
 #include "Options.struct.hpp"
 #include "Parser.class.hpp"
 #include "Position.struct.hpp"
@@ -47,89 +48,18 @@ int getOptions(int argc, const char **argv, Options &options)
 	return 1;
 }
 
-class MyMap: public std::unordered_map<Puzzle, int, Puzzle::HashFunction>
-{
-	public:
-	int &operator[](const Puzzle &k)
-	{
-		if (this->find(k) == this->end())
-
-			this->std::unordered_map<Puzzle, int, Puzzle::HashFunction>::operator[](k) =
-				std::numeric_limits<int>::max() / 2;
-
-		return this->std::unordered_map<Puzzle, int, Puzzle::HashFunction>::operator[](k);
-	}
-
-	int &operator[](Puzzle &&k)
-	{
-		if (this->find(k) == this->end())
-
-			this->std::unordered_map<Puzzle, int, Puzzle::HashFunction>::operator[](k) =
-				std::numeric_limits<int>::max() / 2;
-
-		return this->std::unordered_map<Puzzle, int, Puzzle::HashFunction>::operator[](k);
-	}
-};
-
-Puzzle goal;
-
-int getCost(int x1, int y1, int x2, int y2)
-{
-	return std::abs(y2 - y1) + abs(x2 - x1);
-}
-
-int getCost(Position pos1, Position pos2)
-{
-	return std::abs(pos2.y - pos1.y) + abs(pos2.x - pos1.x);
-}
-
-Array<Position> arr;
-
-int h(const Puzzle &puzzle)
-{
-	int size = puzzle.getSize();
-	int total = 0;
-
-	for (int y = 0; y < size; y++)
-	{
-		for (int x = 0; x < size; x++)
-		{
-			Position &pos = arr[puzzle.at(y, x)];
-			total += std::abs(pos.y - y) + abs(pos.x - x);
-		}
-	}
-	return total;
-}
-
-// int h(const Puzzle &puzzle)
-// {
-// 	int   size = puzzle.getSize();
-// 	Puzzle goal = Puzzle::getFinalState(size);
-// 	int   total = 0;
-
-// 	for (int i = 0; i < size * size; i++)
-// 	{
-// 		if (puzzle[i] != goal[i])
-// 			total += 1;
-// 	}
-
-// 	return total;
-// }
-
-MyMap gScore;
-
 struct Compare
 {
 	bool operator()(const Puzzle &p1, const Puzzle &p2)
 	{
-		return (h(p1) + gScore[p1]) > (h(p2) + gScore[p2]);
+		return (p1.getF() > p2.getF());
 	}
 };
 
 class MyQueue: public std::priority_queue<Puzzle, std::vector<Puzzle>, Compare>
 {
 	public:
-	bool checkValue(const Puzzle &puzzle) const
+	bool hasValue(const Puzzle &puzzle) const
 	{
 		const Puzzle *addrStart = &this->top();
 		const Puzzle *addrEnd = &this->top() + this->size();
@@ -142,72 +72,78 @@ class MyQueue: public std::priority_queue<Puzzle, std::vector<Puzzle>, Compare>
 	}
 };
 
-void init(int size)
+struct HashFunction
 {
-	arr = Array<Position>(size * size);
-	goal = Puzzle::getGoal(size);
-	for (int y = 0; y < size; y++)
-		for (int x = 0; x < size; x++)
-			arr[goal.at(y, x)] = { y, x };
+	size_t operator()(const Puzzle &puzzle) const
+	{
+		return puzzle.getHash();
+	}
+};
+
+std::list<Puzzle> getList(std::unordered_map<Puzzle, Puzzle, HashFunction> &cameFrom, const Puzzle &start,
+                          const Puzzle &goal)
+{
+	std::list<Puzzle> solution;
+
+	solution.push_front(goal);
+	while (solution.front().getHash() != start.getHash())
+		solution.push_front(cameFrom[solution.front()]);
+
+	return solution;
 }
 
-Puzzle process(Puzzle &start, const Options &options)
+std::list<Puzzle> process(Puzzle &start, const Options &options)
 {
 	MyQueue                                          opened;
-	std::unordered_set<Puzzle, Puzzle::HashFunction> closed;
+	std::unordered_set<Puzzle, HashFunction>         closed;
+	std::unordered_map<Puzzle, Puzzle, HashFunction> cameFrom;
 
-	init(start.getSize());
-	Puzzle finalSate = Puzzle::getGoal(start.getSize());
-	gScore[start] = 0;
+	Heuristic::init(start.getSize());
+	Puzzle::setHeuristicFunction(Heuristic::manhattan);
+	Puzzle goal = Puzzle::getGoal(start.getSize());
+
+	start.setG(0);
+	start.updateParameters();
 	opened.push(start);
 
 	while (!opened.empty())
 	{
 		Puzzle current = opened.top();
 
-		if (current == finalSate)
-			return finalSate;
-
-		// std::cout << current << std::endl;
+		if (current == goal)
+			return getList(cameFrom, start, goal);
 
 		opened.pop();
-		// if (!opened.empty())
-		// {
-		// 	std::cout << "1=\n" << current << h(current) + gScore[current] << std::endl;
-		// 	std::cout << "2=\n" << opened.top() << h(opened.top()) + gScore[opened.top()] << std::endl;
-		// }
 		closed.insert(current);
-		for (const Puzzle &child: current.getChildren())
+		for (Puzzle &child: current.getChildren())
 		{
-			bool foundInOpened = opened.checkValue(child);
+			bool foundInOpened = opened.hasValue(child);
 			bool foundInClosed = closed.find(child) != closed.end();
 			if (!foundInOpened && !foundInClosed)
 			{
-				// std::cout << h(child) << " " << gScore[child] << std::endl;
-				gScore[child] = gScore[current] + 1;
-				opened.push(child);
-				// predecesseor(s) <- e
+				child.setG(current.getG() + 1);
+				cameFrom[child] = current;
+				opened.push(std::move(child));
 			}
-			else if (gScore[child] > gScore[current] + 1)
+			else if (child.getG() > current.getG() + 1)
 			{
-				gScore[child] = gScore[current] + 1;
-				// predecesseor(s) <- e
+				child.setG(current.getG() + 1);
+				cameFrom[child] = current;
 				if (foundInClosed)
 				{
-					// std::cout << h(child) << " " << gScore[child] << std::endl;
 					closed.erase(child);
-					opened.push(child);
+					opened.push(std::move(child));
 				}
 			}
 		}
 	}
-	return Puzzle(start.getSize());
+	return {};
 }
 
 int main(int argc, char const *argv[])
 {
 	Options options;
-	Puzzle  puzzle;
+	Puzzle  start;
 
 	try
 	{
@@ -218,13 +154,15 @@ int main(int argc, char const *argv[])
 		parser.parse();
 		if (options.parseOnly)
 		{
-			std::cout << parser.getPuzzle();
+			parser.getPuzzle().print(std::cout, true);
 			return 0;
 		}
-		puzzle = parser.getPuzzle();
-		std::cout << puzzle << std::endl;
-		Puzzle goal = process(puzzle, options);
-		std::cout << goal << std::endl;
+		start = parser.getPuzzle();
+		std::cout << "START" << std::endl;
+		std::cout << start << "-----" << std::endl << std::endl;
+		std::list<Puzzle> list = process(start, options);
+		for (const Puzzle &puzzle: list)
+			std::cout << puzzle << std::endl;
 	}
 	catch (const std::exception &e)
 	{

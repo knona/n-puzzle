@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <utility>
 
+int (*Puzzle::heuristicFunction)(const Puzzle &) = nullptr;
+
 void Puzzle::init(int size)
 {
 	this->_size = size;
@@ -15,10 +17,10 @@ void Puzzle::init(int size)
 		this->_data[i] = 0;
 }
 
-Puzzle::Puzzle(): _size(0), _data(nullptr), _isEmptyPosDefined(false)
+Puzzle::Puzzle(): _size(0), _data(nullptr), _isEmptyPosDefined(false), _g(std::numeric_limits<int>::max())
 {}
 
-Puzzle::Puzzle(int size): _isEmptyPosDefined(false)
+Puzzle::Puzzle(int size): _isEmptyPosDefined(false), _g(std::numeric_limits<int>::max())
 {
 	this->init(size);
 }
@@ -41,6 +43,9 @@ Puzzle &Puzzle::operator=(const Puzzle &puzzle)
 		init(puzzle._size);
 		this->_emptyPos = puzzle._emptyPos;
 		this->_isEmptyPosDefined = puzzle._isEmptyPosDefined;
+		this->_h = puzzle._h;
+		this->_g = puzzle._g;
+		this->_hash = puzzle._hash;
 		for (int i = 0; i < this->_size * this->_size; i++)
 			this->_data[i] = puzzle._data[i];
 	}
@@ -55,6 +60,9 @@ Puzzle &Puzzle::operator=(Puzzle &&puzzle)
 		this->_size = puzzle._size;
 		this->_emptyPos = puzzle._emptyPos;
 		this->_isEmptyPosDefined = puzzle._isEmptyPosDefined;
+		this->_h = puzzle._h;
+		this->_g = puzzle._g;
+		this->_hash = puzzle._hash;
 		this->_data = std::move(puzzle._data);
 	}
 	return *this;
@@ -209,6 +217,7 @@ void Puzzle::move(Move direction)
 		throw std::logic_error(catArgs("Cannot move from position:\n", this->_emptyPos, "\nto\n", newPos));
 	std::swap(this->at(this->_emptyPos), this->at(newPos));
 	this->_emptyPos = newPos;
+	this->updateParameters();
 }
 
 std::optional<Puzzle> Puzzle::getMovedPuzzle(Move direction) const
@@ -233,6 +242,7 @@ std::optional<Puzzle> Puzzle::getMovedPuzzle(Move direction) const
 	Puzzle newPuzzle(*this);
 	std::swap(newPuzzle.at(newPuzzle._emptyPos), newPuzzle.at(newPos));
 	newPuzzle._emptyPos = newPos;
+	newPuzzle.updateParameters();
 	return newPuzzle;
 }
 
@@ -274,16 +284,53 @@ Puzzle Puzzle::getGoal(int size)
 			dir = (dir + 1) % 4;
 		}
 	}
+	goal._hash = goal.hash();
 	return goal;
 }
 
 // works only for size <= 4
-size_t Puzzle::HashFunction::operator()(const Puzzle &puzzle) const
+size_t Puzzle::hash() const
 {
 	size_t seed = 0;
 
-	for (int i = 0; i < puzzle._size * puzzle._size; i++)
-		seed |= static_cast<size_t>(puzzle[i]) << (4 * i);
+	for (int i = 0; i < this->_size * this->_size; i++)
+		seed |= static_cast<size_t>((*this)[i]) << (4 * i);
 
 	return seed;
+}
+
+void Puzzle::updateParameters()
+{
+	this->_h = Puzzle::heuristicFunction(*this);
+	this->_hash = this->hash();
+}
+
+size_t Puzzle::getHash() const
+{
+	return this->_hash;
+}
+
+int Puzzle::getH() const
+{
+	return this->_h;
+}
+
+void Puzzle::setG(int value)
+{
+	this->_g = value;
+}
+
+int Puzzle::getG() const
+{
+	return this->_g;
+}
+
+int Puzzle::getF() const
+{
+	return this->_g + this->_h;
+}
+
+void Puzzle::setHeuristicFunction(int (*heuristicFunction)(const Puzzle &))
+{
+	Puzzle::heuristicFunction = heuristicFunction;
 }

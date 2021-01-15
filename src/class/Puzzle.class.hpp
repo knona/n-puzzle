@@ -19,8 +19,14 @@ class Puzzle
 	std::unique_ptr<int[]> _data;
 	Position               _emptyPos;
 	bool                   _isEmptyPosDefined;
+	int                    _h;
+	int                    _g;
+	size_t                 _hash;
 
-	void init(int size);
+	static int (*heuristicFunction)(const Puzzle &);
+
+	void   init(int size);
+	size_t hash() const;
 
 	public:
 	Puzzle();
@@ -48,13 +54,15 @@ class Puzzle
 	void                  move(Move direction);
 	std::optional<Puzzle> getMovedPuzzle(Move direction) const;
 	std::vector<Puzzle>   getChildren() const;
+	int                   getH() const;
+	void                  updateParameters();
+	int                   getG() const;
+	void                  setG(int value);
+	int                   getF() const;
+	size_t                getHash() const;
 
 	static Puzzle getGoal(int size);
-
-	struct HashFunction
-	{
-		size_t operator()(const Puzzle &puzzle) const;
-	};
+	static void   setHeuristicFunction(int (*heuristicFunction)(const Puzzle &));
 };
 
 std::ostream &operator<<(std::ostream &os, const Puzzle &puz);
