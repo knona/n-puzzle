@@ -47,67 +47,67 @@ int getOptions(int argc, const char **argv, Options &options)
 	return 1;
 }
 
-class MyMap: public std::unordered_map<Puzzle, uint, Puzzle::HashFunction>
+class MyMap: public std::unordered_map<Puzzle, int, Puzzle::HashFunction>
 {
 	public:
-	uint &operator[](const Puzzle &k)
+	int &operator[](const Puzzle &k)
 	{
 		if (this->find(k) == this->end())
 
-			this->std::unordered_map<Puzzle, uint, Puzzle::HashFunction>::operator[](k) =
-				std::numeric_limits<uint>::max() / 2;
+			this->std::unordered_map<Puzzle, int, Puzzle::HashFunction>::operator[](k) =
+				std::numeric_limits<int>::max() / 2;
 
-		return this->std::unordered_map<Puzzle, uint, Puzzle::HashFunction>::operator[](k);
+		return this->std::unordered_map<Puzzle, int, Puzzle::HashFunction>::operator[](k);
 	}
 
-	uint &operator[](Puzzle &&k)
+	int &operator[](Puzzle &&k)
 	{
 		if (this->find(k) == this->end())
 
-			this->std::unordered_map<Puzzle, uint, Puzzle::HashFunction>::operator[](k) =
-				std::numeric_limits<uint>::max() / 2;
+			this->std::unordered_map<Puzzle, int, Puzzle::HashFunction>::operator[](k) =
+				std::numeric_limits<int>::max() / 2;
 
-		return this->std::unordered_map<Puzzle, uint, Puzzle::HashFunction>::operator[](k);
+		return this->std::unordered_map<Puzzle, int, Puzzle::HashFunction>::operator[](k);
 	}
 };
 
 Puzzle goal;
 
-uint getCost(uint x1, uint y1, uint x2, uint y2)
+int getCost(int x1, int y1, int x2, int y2)
 {
-	return (y2 > y1 ? y2 : y1) + (x2 > x1 ? x2 : x1);
+	return std::abs(y2 - y1) + abs(x2 - x1);
 }
 
-uint getCost(Position pos1, Position pos2)
+int getCost(Position pos1, Position pos2)
 {
-	return (pos2.y > pos1.y ? pos2.y : pos1.y) + (pos2.x > pos1.x ? pos2.x : pos1.x);
+	return std::abs(pos2.y - pos1.y) + abs(pos2.x - pos1.x);
 }
 
 Array<Position> arr;
 
-uint h(const Puzzle &puzzle)
+int h(const Puzzle &puzzle)
 {
-	uint size = puzzle.getSize();
-	uint total = 0;
+	int size = puzzle.getSize();
+	int total = 0;
 
-	for (uint y = 0; y < size; y++)
+	for (int y = 0; y < size; y++)
 	{
-		for (uint x = 0; x < size; x++)
+		for (int x = 0; x < size; x++)
 		{
-			uint cost = getCost(arr[puzzle.at(y, x)], { y, x });
+			int cost = getCost(arr[puzzle.at(y, x)], { y, x });
 			total += cost;
 		}
 	}
 	return total;
 }
 
-// uint h(const Puzzle &puzzle)
+// int h(const Puzzle &puzzle)
 // {
-// 	uint   size = puzzle.getSize();
+// 	int   size = puzzle.getSize();
 // 	Puzzle goal = Puzzle::getFinalState(size);
-// 	uint   total = 0;
+// 	int   total = 0;
 
-// 	for (uint i = 0; i < size * size; i++)
+// 	for (int i = 0; i < size * size; i++)
 // 	{
 // 		if (puzzle[i] != goal[i])
 // 			total += 1;
@@ -142,58 +142,12 @@ class MyQueue: public std::priority_queue<Puzzle, std::vector<Puzzle>, Compare>
 	}
 };
 
-/* Puzzle process(Puzzle &start, const Options &options)
-{
-    MyQueue                                          opened;
-    std::unordered_set<Puzzle, Puzzle::HashFunction> closed;
-    // MyMap                                            gScore;
-
-    Puzzle goal = Puzzle::getFinalState(start.getSize());
-    gScore[start] = 0;
-    opened.push(start);
-
-    while (!opened.empty())
-    {
-        Puzzle current = opened.top();
-
-        if (current == goal)
-            return goal;
-
-        std::cout << current << std::endl;
-
-        opened.pop();
-        closed.insert(current);
-        for (const Puzzle &child: current.getChildren())
-        {
-            bool foundInOpened = opened.checkValue(child);
-            bool foundInClosed = closed.find(child) != closed.end();
-
-            if (foundInClosed)
-                continue;
-
-            if (!foundInOpened)
-            {
-                gScore[child] = gScore[current] + 1;
-                opened.push(child);
-            }
-            else
-            {
-                if (gScore[current] + 1 < gScore[child])
-                {
-                    gScore[child] = gScore[current] + 1;
-                }
-            }
-        }
-    }
-    return Puzzle(start.getSize());
-} */
-
-void init(uint size)
+void init(int size)
 {
 	arr = Array<Position>(size * size);
 	goal = Puzzle::getFinalState(size);
-	for (uint y = 0; y < size; y++)
-		for (uint x = 0; x < size; x++)
+	for (int y = 0; y < size; y++)
+		for (int x = 0; x < size; x++)
 			arr[goal.at(y, x)] = { y, x };
 }
 
@@ -201,7 +155,6 @@ Puzzle process(Puzzle &start, const Options &options)
 {
 	MyQueue                                          opened;
 	std::unordered_set<Puzzle, Puzzle::HashFunction> closed;
-	// MyMap                                            gScore;
 
 	init(start.getSize());
 	Puzzle finalSate = Puzzle::getFinalState(start.getSize());

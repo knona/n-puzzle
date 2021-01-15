@@ -15,29 +15,31 @@ typedef unsigned int uint;
 class Puzzle
 {
 	private:
-	uint                    _size;
-	std::unique_ptr<uint[]> _data;
-	Position                _emptyPos;
-	bool                    _isEmptyPosDefined;
+	int                    _size;
+	std::unique_ptr<int[]> _data;
+	Position               _emptyPos;
+	bool                   _isEmptyPosDefined;
 
-	void init(uint size);
+	void init(int size);
 
 	public:
 	Puzzle();
-	Puzzle(uint size);
+	Puzzle(int size);
 	Puzzle(const Puzzle &);
 	Puzzle &operator=(const Puzzle &);
 	Puzzle(Puzzle &&);
 	Puzzle &operator=(Puzzle &&);
 	~Puzzle();
 
-	uint                  getSize() const;
-	uint &                operator[](uint index);
-	uint                  operator[](uint index) const;
-	uint &                at(uint a, uint b);
-	uint                  at(uint a, uint b) const;
-	uint &                at(Position pos);
-	uint                  at(Position pos) const;
+	int                   getSize() const;
+	int &                 operator[](int index);
+	int                   operator[](int index) const;
+	int &                 at(int index);
+	int                   at(int index) const;
+	int &                 at(int y, int x);
+	int                   at(int y, int x) const;
+	int &                 at(Position pos);
+	int                   at(Position pos) const;
 	void                  print(std::ostream &os = std::cout, bool displaySize = false) const;
 	void                  setZeroPosition(const Position &pos);
 	void                  setZeroPosition();
@@ -53,7 +55,7 @@ class Puzzle
 		size_t operator()(const Puzzle &puzzle) const;
 	};
 
-	static Puzzle getFinalState(uint size);
+	static Puzzle getFinalState(int size);
 };
 
 std::ostream &operator<<(std::ostream &os, const Puzzle &puz);

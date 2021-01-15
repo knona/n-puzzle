@@ -3,12 +3,10 @@
 
 #include <iostream>
 
-typedef unsigned int uint;
-
 struct Position
 {
-	uint y;
-	uint x;
+	int y;
+	int x;
 };
 
 std::ostream &operator<<(std::ostream &os, const Position &pos);

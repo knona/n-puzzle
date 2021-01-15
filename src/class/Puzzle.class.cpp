@@ -7,18 +7,18 @@
 #include <exception>
 #include <iomanip>
 
-void Puzzle::init(uint size)
+void Puzzle::init(int size)
 {
 	this->_size = size;
-	this->_data = std::make_unique<uint[]>(size * size);
-	for (uint i = 0; i < this->_size * this->_size; i++)
+	this->_data = std::make_unique<int[]>(size * size);
+	for (int i = 0; i < this->_size * this->_size; i++)
 		this->_data[i] = 0;
 }
 
 Puzzle::Puzzle(): _size(0), _data(nullptr), _isEmptyPosDefined(false)
 {}
 
-Puzzle::Puzzle(uint size): _isEmptyPosDefined(false)
+Puzzle::Puzzle(int size): _isEmptyPosDefined(false)
 {
 	this->init(size);
 }
@@ -41,7 +41,7 @@ Puzzle &Puzzle::operator=(const Puzzle &puzzle)
 		init(puzzle._size);
 		this->_emptyPos = puzzle._emptyPos;
 		this->_isEmptyPosDefined = puzzle._isEmptyPosDefined;
-		for (uint i = 0; i < this->_size * this->_size; i++)
+		for (int i = 0; i < this->_size * this->_size; i++)
 			this->_data[i] = puzzle._data[i];
 	}
 	return *this;
@@ -63,26 +63,40 @@ Puzzle &Puzzle::operator=(Puzzle &&puzzle)
 Puzzle::~Puzzle()
 {}
 
-uint Puzzle::getSize() const
+int Puzzle::getSize() const
 {
 	return this->_size;
 }
 
-uint &Puzzle::operator[](uint index)
+int &Puzzle::operator[](int index)
 {
 	if (index >= this->_size * this->_size)
 		throw std::out_of_range(catArgs(index, " is out of range"));
 	return this->_data[index];
 }
 
-uint Puzzle::operator[](uint index) const
+int Puzzle::operator[](int index) const
 {
 	if (index >= this->_size * this->_size)
 		throw std::out_of_range(catArgs(index, " is out of range"));
 	return this->_data[index];
 }
 
-uint &Puzzle::at(uint y, uint x)
+int &Puzzle::at(int index)
+{
+	if (index >= this->_size * this->_size)
+		throw std::out_of_range(catArgs(index, " is out of range"));
+	return this->_data[index];
+}
+
+int Puzzle::at(int index) const
+{
+	if (index >= this->_size * this->_size)
+		throw std::out_of_range(catArgs(index, " is out of range"));
+	return this->_data[index];
+}
+
+int &Puzzle::at(int y, int x)
 {
 	if (y >= this->_size)
 		throw std::out_of_range(catArgs(y, " is out of range"));
@@ -91,7 +105,7 @@ uint &Puzzle::at(uint y, uint x)
 	return this->_data[y * this->_size + x];
 }
 
-uint Puzzle::at(uint y, uint x) const
+int Puzzle::at(int y, int x) const
 {
 	if (y >= this->_size)
 		throw std::out_of_range(catArgs(y, " is out of range"));
@@ -100,7 +114,7 @@ uint Puzzle::at(uint y, uint x) const
 	return this->_data[y * this->_size + x];
 }
 
-uint &Puzzle::at(Position pos)
+int &Puzzle::at(Position pos)
 {
 	if (pos.x >= this->_size)
 		throw std::out_of_range(catArgs(pos.x, " is out of range"));
@@ -109,7 +123,7 @@ uint &Puzzle::at(Position pos)
 	return this->_data[pos.y * this->_size + pos.x];
 }
 
-uint Puzzle::at(Position pos) const
+int Puzzle::at(Position pos) const
 {
 	if (pos.x >= this->_size)
 		throw std::out_of_range(catArgs(pos.x, " is out of range"));
@@ -120,13 +134,13 @@ uint Puzzle::at(Position pos) const
 
 void Puzzle::print(std::ostream &os, bool displaySize) const
 {
-	uint width = std::to_string(this->_size * this->_size - 1).length();
+	int width = std::to_string(this->_size * this->_size - 1).length();
 
 	if (displaySize)
 		os << this->_size << std::endl;
-	for (uint i = 0; i < this->_size; i++)
+	for (int i = 0; i < this->_size; i++)
 	{
-		for (uint j = 0; j < this->_size; j++)
+		for (int j = 0; j < this->_size; j++)
 		{
 			if (j != 0)
 				os << " ";
@@ -144,7 +158,7 @@ void Puzzle::setZeroPosition(const Position &pos)
 
 void Puzzle::setZeroPosition()
 {
-	for (uint i = 0; i < this->_size * this->_size; i++)
+	for (int i = 0; i < this->_size * this->_size; i++)
 	{
 		if (this->_data[i] == 0)
 		{
@@ -173,25 +187,25 @@ void Puzzle::move(Move direction)
 	if (direction == Move::Top)
 	{
 		newPos.y++;
-		if (newPos.y == this->_size)
+		if (newPos.y >= this->_size)
 			throw std::logic_error(catArgs("Cannot move top from position:\n", this->_emptyPos));
 	}
 	else if (direction == Move::Right)
 	{
 		newPos.x--;
-		if (newPos.x == std::numeric_limits<uint>::max())
+		if (newPos.x < 0)
 			throw std::logic_error(catArgs("Cannot move right from position:\n", this->_emptyPos));
 	}
 	else if (direction == Move::Bottom)
 	{
 		newPos.y--;
-		if (newPos.y == std::numeric_limits<uint>::max())
+		if (newPos.y < 0)
 			throw std::logic_error(catArgs("Cannot move bottom from position:\n", this->_emptyPos));
 	}
 	else if (direction == Move::Left)
 	{
 		newPos.x++;
-		if (newPos.x == this->_size)
+		if (newPos.x >= this->_size)
 			throw std::logic_error(catArgs("Cannot move left from position:\n", this->_emptyPos));
 	}
 	mySwap(this->at(this->_emptyPos), this->at(newPos));
@@ -208,25 +222,25 @@ std::optional<Puzzle> Puzzle::moveAndRet(Move direction) const
 	if (direction == Move::Top)
 	{
 		newPos.y++;
-		if (newPos.y == this->_size)
+		if (newPos.y >= this->_size)
 			return {};
 	}
 	else if (direction == Move::Right)
 	{
 		newPos.x--;
-		if (newPos.x == std::numeric_limits<uint>::max())
+		if (newPos.x < 0)
 			return {};
 	}
 	else if (direction == Move::Bottom)
 	{
 		newPos.y--;
-		if (newPos.y == std::numeric_limits<uint>::max())
+		if (newPos.y < 0)
 			return {};
 	}
 	else if (direction == Move::Left)
 	{
 		newPos.x++;
-		if (newPos.x == this->_size)
+		if (newPos.x >= this->_size)
 			return {};
 	}
 	Puzzle newPuzzle(*this);
@@ -237,7 +251,7 @@ std::optional<Puzzle> Puzzle::moveAndRet(Move direction) const
 
 bool Puzzle::operator==(const Puzzle &puzzle) const
 {
-	for (uint i = 0; i < this->_size * this->_size; i++)
+	for (int i = 0; i < this->_size * this->_size; i++)
 		if (this->_data[i] != puzzle._data[i])
 			return false;
 	return true;
@@ -252,26 +266,26 @@ size_t Puzzle::HashFunction::operator()(const Puzzle &puzzle) const
 {
 	size_t seed = 0;
 
-	for (uint i = 0; i < puzzle._size * puzzle._size; i++)
+	for (int i = 0; i < puzzle._size * puzzle._size; i++)
 		seed |= static_cast<size_t>(puzzle[i]) << (4 * i);
 
 	return seed;
 }
 
-Puzzle Puzzle::getFinalState(uint size)
+Puzzle Puzzle::getFinalState(int size)
 {
 	Puzzle ret(size);
 
 	uint dir = 0;
-	uint nb = size;
-	uint v = 1;
+	int  nb = size;
+	int  v = 1;
 
 	int x = -1, y = 0;
 	while (v != size * size)
 	{
-		for (uint i = nb == size || nb == 1 ? 1 : 0; i < 2; i++)
+		for (int i = nb == size || nb == 1 ? 1 : 0; i < 2; i++)
 		{
-			for (uint j = 0; j < nb; j++)
+			for (int j = 0; j < nb; j++)
 			{
 				if (dir == 0)
 					x++;
@@ -296,7 +310,7 @@ std::vector<Puzzle> Puzzle::getChildren() const
 {
 	std::vector<Puzzle> vec;
 
-	for (uint i = 0; i < 4; i++)
+	for (int i = 0; i < 4; i++)
 	{
 		try
 		{
