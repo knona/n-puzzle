@@ -197,30 +197,7 @@ bool Puzzle::operator!=(const Puzzle &puzzle) const
 	return !(*this == puzzle);
 }
 
-void Puzzle::move(Move direction)
-{
-	if (!this->_isEmptyPosDefined)
-		throw std::logic_error("Cannot move, empty position is not set");
-
-	Position newPos = this->_emptyPos;
-
-	if (direction == Move::Top)
-		newPos.y++;
-	else if (direction == Move::Right)
-		newPos.x--;
-	else if (direction == Move::Bottom)
-		newPos.y--;
-	else if (direction == Move::Left)
-		newPos.x++;
-
-	if (newPos.y >= this->_size || newPos.y < 0 || newPos.x >= this->_size || newPos.x < 0)
-		throw std::logic_error(catArgs("Cannot move from position:\n", this->_emptyPos, "\nto\n", newPos));
-	std::swap(this->at(this->_emptyPos), this->at(newPos));
-	this->_emptyPos = newPos;
-	this->updateParameters();
-}
-
-std::optional<Puzzle> Puzzle::getMovedPuzzle(Move direction) const
+std::optional<Puzzle> Puzzle::move(Move direction) const
 {
 	if (!this->_isEmptyPosDefined)
 		throw std::logic_error("Cannot move, empty position is not set");
@@ -252,7 +229,7 @@ std::vector<Puzzle> Puzzle::getChildren() const
 
 	for (int i = 0; i < 4; i++)
 	{
-		std::optional<Puzzle> puzzle = this->getMovedPuzzle(static_cast<Move>(i));
+		std::optional<Puzzle> puzzle = this->move(static_cast<Move>(i));
 		if (puzzle.has_value())
 			children.push_back(std::move(puzzle.value()));
 	}

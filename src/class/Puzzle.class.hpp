@@ -51,8 +51,7 @@ class Puzzle
 	void                  print(std::ostream &os = std::cout, bool displaySize = false) const;
 	void                  setZeroPosition(const Position &pos);
 	void                  setZeroPosition();
-	void                  move(Move direction);
-	std::optional<Puzzle> getMovedPuzzle(Move direction) const;
+	std::optional<Puzzle> move(Move direction) const;
 	std::vector<Puzzle>   getChildren() const;
 	int                   getH() const;
 	void                  updateParameters();
