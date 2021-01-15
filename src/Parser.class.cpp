@@ -62,9 +62,9 @@ int Parser::strtoint(const std::string &str, size_t *index, int max, int min)
 	catch (const std::out_of_range &e)
 	{
 		if (str[0] == '-')
-			throw Exception::ParserLight(catArgs(nStr, " is greater than ", max));
-		else
 			throw Exception::ParserLight(catArgs(nStr, " is lower than ", min));
+		else
+			throw Exception::ParserLight(catArgs(nStr, " is greater than ", max));
 	}
 
 	if (n < min)
