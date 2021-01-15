@@ -81,7 +81,7 @@ void Parser::setPuzzleSize(const std::string &line, int &i)
 	int    size;
 
 	this->_pos.col = i;
-	size = static_cast<int>(this->strtoint(line.c_str() + i, &nbChars, 100, 3));
+	size = static_cast<int>(this->strtoint(line.c_str() + i, &nbChars, 4, 3));
 	for (i += nbChars; i < static_cast<int>(line.length()) && std::isspace(line[i]); i++)
 		;
 	if (i != static_cast<int>(line.length()) && line[i] != '#')
