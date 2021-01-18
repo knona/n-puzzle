@@ -8,6 +8,36 @@ bool PuzzlePriorityQueue::CompareFunction::operator()(const Puzzle &p1, const Pu
 PuzzlePriorityQueue::PuzzlePriorityQueue()
 {}
 
+PuzzlePriorityQueue::PuzzlePriorityQueue(const PuzzlePriorityQueue &container)
+{
+	*this = container;
+}
+
+PuzzlePriorityQueue &PuzzlePriorityQueue::operator=(const PuzzlePriorityQueue &container)
+{
+	if (this != &container)
+	{
+		this->_queue = container._queue;
+		this->_umap = container._umap;
+	}
+	return *this;
+}
+
+PuzzlePriorityQueue::PuzzlePriorityQueue(PuzzlePriorityQueue &&container)
+{
+	*this = std::move(container);
+}
+
+PuzzlePriorityQueue &PuzzlePriorityQueue::operator=(PuzzlePriorityQueue &&container)
+{
+	if (this != &container)
+	{
+		this->_queue = std::move(container._queue);
+		this->_umap = std::move(container._umap);
+	}
+	return *this;
+}
+
 PuzzlePriorityQueue::~PuzzlePriorityQueue()
 {}
 

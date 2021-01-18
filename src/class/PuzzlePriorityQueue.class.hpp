@@ -5,6 +5,7 @@
 
 #include <queue>
 #include <unordered_set>
+#include <vector>
 
 class PuzzlePriorityQueue
 {
@@ -19,10 +20,10 @@ class PuzzlePriorityQueue
 
 	public:
 	PuzzlePriorityQueue();
-	PuzzlePriorityQueue(const PuzzlePriorityQueue &) = delete;
-	PuzzlePriorityQueue &operator=(const PuzzlePriorityQueue &) = delete;
-	PuzzlePriorityQueue(PuzzlePriorityQueue &&) = delete;
-	PuzzlePriorityQueue &operator=(PuzzlePriorityQueue &&) = delete;
+	PuzzlePriorityQueue(const PuzzlePriorityQueue &);
+	PuzzlePriorityQueue &operator=(const PuzzlePriorityQueue &);
+	PuzzlePriorityQueue(PuzzlePriorityQueue &&);
+	PuzzlePriorityQueue &operator=(PuzzlePriorityQueue &&);
 	~PuzzlePriorityQueue();
 
 	int           size();
