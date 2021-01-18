@@ -105,7 +105,7 @@ void Parser::setPuzzleRow(const std::string &line, int &i)
 		auto [it, isNewElement] = this->_hashTable.insert(n);
 		if (!isNewElement)
 			throw Exception::ParserLight("Number already set");
-		this->_puzzle.at(this->_rows, cols) = n;
+		this->_puzzle.setAt(this->_rows, cols, n);
 		if (n == 0)
 			this->_puzzle.setZeroPosition({ _rows, cols });
 		for (i += nbChars; i < static_cast<int>(line.length()) && std::isspace(line[i]); i++)

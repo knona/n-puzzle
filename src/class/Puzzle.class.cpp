@@ -9,20 +9,13 @@
 
 int (*Puzzle::heuristicFunction)(const Puzzle &) = nullptr;
 
-void Puzzle::init(int size)
-{
-	this->_size = size;
-	this->_data = std::make_unique<int[]>(size * size);
-	for (int i = 0; i < this->_size * this->_size; i++)
-		this->_data[i] = 0;
-}
-
-Puzzle::Puzzle(): _size(0), _data(nullptr), _isEmptyPosDefined(false), _g(std::numeric_limits<int>::max())
+Puzzle::Puzzle(): _size(0), _data(0), _emptyPos { -1, -1 }, _g(std::numeric_limits<int>::max())
 {}
 
-Puzzle::Puzzle(int size): _isEmptyPosDefined(false), _g(std::numeric_limits<int>::max())
+Puzzle::Puzzle(int size): _size(size), _data(0), _emptyPos { -1, -1 }, _g(std::numeric_limits<int>::max())
 {
-	this->init(size);
+	if (size < 3 || size > 4)
+		throw std::runtime_error("The puzzle's size must be between 3 and 4");
 }
 
 Puzzle::Puzzle(const Puzzle &puzzle)
@@ -39,15 +32,11 @@ Puzzle &Puzzle::operator=(const Puzzle &puzzle)
 {
 	if (this != &puzzle)
 	{
-		this->_data.reset();
-		init(puzzle._size);
+		this->_data = puzzle._data;
+		this->_size = puzzle._size;
 		this->_emptyPos = puzzle._emptyPos;
-		this->_isEmptyPosDefined = puzzle._isEmptyPosDefined;
 		this->_h = puzzle._h;
 		this->_g = puzzle._g;
-		this->_hash = puzzle._hash;
-		for (int i = 0; i < this->_size * this->_size; i++)
-			this->_data[i] = puzzle._data[i];
 	}
 	return *this;
 }
@@ -56,14 +45,11 @@ Puzzle &Puzzle::operator=(Puzzle &&puzzle)
 {
 	if (this != &puzzle)
 	{
-		this->_data.reset();
+		this->_data = puzzle._data;
 		this->_size = puzzle._size;
 		this->_emptyPos = puzzle._emptyPos;
-		this->_isEmptyPosDefined = puzzle._isEmptyPosDefined;
 		this->_h = puzzle._h;
 		this->_g = puzzle._g;
-		this->_hash = puzzle._hash;
-		this->_data = std::move(puzzle._data);
 	}
 	return *this;
 }
@@ -76,68 +62,99 @@ int Puzzle::getSize() const
 	return this->_size;
 }
 
-int &Puzzle::operator[](int index)
+size_t Puzzle::getData() const
 {
-	if (index >= this->_size * this->_size)
-		throw std::out_of_range(catArgs(index, " is out of range"));
-	return this->_data[index];
+	return this->_data;
 }
 
 int Puzzle::operator[](int index) const
 {
 	if (index >= this->_size * this->_size)
 		throw std::out_of_range(catArgs(index, " is out of range"));
-	return this->_data[index];
+	return (this->_data >> (index * 4)) & 0xF;
 }
 
-int &Puzzle::at(int index)
+int Puzzle::getAt(int index) const
 {
 	if (index >= this->_size * this->_size)
 		throw std::out_of_range(catArgs(index, " is out of range"));
-	return this->_data[index];
+	return (this->_data >> (index * 4)) & 0xF;
 }
 
-int Puzzle::at(int index) const
+void Puzzle::setAt(int index, int value)
 {
 	if (index >= this->_size * this->_size)
 		throw std::out_of_range(catArgs(index, " is out of range"));
-	return this->_data[index];
+	this->_data &= ~(0xFL << (index * 4));
+	this->_data |= (static_cast<size_t>(value) << (index * 4));
 }
 
-int &Puzzle::at(int y, int x)
+int Puzzle::getAt(int y, int x) const
 {
 	if (y >= this->_size)
 		throw std::out_of_range(catArgs(y, " is out of range"));
 	if (x >= this->_size)
 		throw std::out_of_range(catArgs(x, " is out of range"));
-	return this->_data[y * this->_size + x];
+	return (this->_data >> ((y * this->_size + x) * 4)) & 0xF;
 }
 
-int Puzzle::at(int y, int x) const
+void Puzzle::setAt(int y, int x, int value)
 {
 	if (y >= this->_size)
 		throw std::out_of_range(catArgs(y, " is out of range"));
 	if (x >= this->_size)
 		throw std::out_of_range(catArgs(x, " is out of range"));
-	return this->_data[y * this->_size + x];
+	this->_data &= ~(0xFL << ((y * this->_size + x) * 4));
+	this->_data |= (static_cast<size_t>(value) << ((y * this->_size + x) * 4));
 }
 
-int &Puzzle::at(Position pos)
+int Puzzle::getAt(const Position &pos) const
 {
-	if (pos.x >= this->_size)
-		throw std::out_of_range(catArgs(pos.x, " is out of range"));
 	if (pos.y >= this->_size)
 		throw std::out_of_range(catArgs(pos.y, " is out of range"));
-	return this->_data[pos.y * this->_size + pos.x];
+	if (pos.x >= this->_size)
+		throw std::out_of_range(catArgs(pos.x, " is out of range"));
+	return (this->_data >> ((pos.y * this->_size + pos.x) * 4)) & 0xF;
 }
 
-int Puzzle::at(Position pos) const
+void Puzzle::setAt(const Position &pos, int value)
 {
-	if (pos.x >= this->_size)
-		throw std::out_of_range(catArgs(pos.x, " is out of range"));
 	if (pos.y >= this->_size)
 		throw std::out_of_range(catArgs(pos.y, " is out of range"));
-	return this->_data[pos.y * this->_size + pos.x];
+	if (pos.x >= this->_size)
+		throw std::out_of_range(catArgs(pos.x, " is out of range"));
+	this->_data &= ~(0xFL << ((pos.y * this->_size + pos.x) * 4));
+	this->_data |= (static_cast<size_t>(value) << ((pos.y * this->_size + pos.x) * 4));
+}
+
+bool Puzzle::operator==(const Puzzle &puzzle) const
+{
+	return this->_data == puzzle._data;
+}
+bool Puzzle::operator!=(const Puzzle &puzzle) const
+{
+	return this->_data != puzzle._data;
+}
+
+void Puzzle::swap(int index1, int index2)
+{
+	int tmp = this->getAt(index1);
+	this->setAt(index1, this->getAt(index2));
+	this->setAt(index2, tmp);
+}
+
+void Puzzle::swap(int y1, int x1, int y2, int x2)
+{
+	int tmp = this->getAt(y1, x1);
+	this->setAt(y1, x1, this->getAt(y2, x2));
+	this->setAt(y2, x2, tmp);
+}
+
+void Puzzle::swap(const Position &pos1, const Position &pos2)
+{
+	int tmp = this->getAt(pos1);
+	this->setAt(pos1, this->getAt(pos2));
+	this->setAt(pos2, tmp);
 }
 
 void Puzzle::print(std::ostream &os, bool displaySize) const
@@ -152,7 +169,7 @@ void Puzzle::print(std::ostream &os, bool displaySize) const
 		{
 			if (j != 0)
 				os << " ";
-			os << std::setw(width) << this->at(i, j);
+			os << std::setw(width) << this->getAt(i, j);
 		}
 		os << std::endl;
 	}
@@ -167,7 +184,6 @@ std::ostream &operator<<(std::ostream &os, const Puzzle &puz)
 void Puzzle::setZeroPosition(const Position &pos)
 {
 	this->_emptyPos = pos;
-	this->_isEmptyPosDefined = true;
 }
 
 void Puzzle::setZeroPosition()
@@ -178,29 +194,16 @@ void Puzzle::setZeroPosition()
 		{
 			this->_emptyPos.y = i / this->_size;
 			this->_emptyPos.x = i % this->_size;
-			this->_isEmptyPosDefined = true;
 			break;
 		}
 	}
 	throw std::logic_error("0 value not found to define empty position");
 }
 
-bool Puzzle::operator==(const Puzzle &puzzle) const
-{
-	for (int i = 0; i < this->_size * this->_size; i++)
-		if ((*this)[i] != puzzle[i])
-			return false;
-	return true;
-}
-bool Puzzle::operator!=(const Puzzle &puzzle) const
-{
-	return !(*this == puzzle);
-}
-
 std::optional<Puzzle> Puzzle::move(Move direction) const
 {
-	if (!this->_isEmptyPosDefined)
-		throw std::logic_error("Cannot move, empty position is not set");
+	if (this->_emptyPos.y == -1 || this->_emptyPos.x == -1)
+		throw std::logic_error("Cannot move, empty position is not properly set");
 
 	Position newPos = this->_emptyPos;
 
@@ -217,15 +220,15 @@ std::optional<Puzzle> Puzzle::move(Move direction) const
 		return {};
 
 	Puzzle newPuzzle(*this);
-	std::swap(newPuzzle.at(newPuzzle._emptyPos), newPuzzle.at(newPos));
+	newPuzzle.swap(newPuzzle._emptyPos, newPos);
 	newPuzzle._emptyPos = newPos;
 	newPuzzle.updateParameters();
 	return newPuzzle;
 }
 
-std::vector<Puzzle> Puzzle::getChildren() const
+std::list<Puzzle> Puzzle::getChildren() const
 {
-	std::vector<Puzzle> children;
+	std::list<Puzzle> children;
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -255,36 +258,18 @@ Puzzle Puzzle::getGoal(int size)
 					x--;
 				if (dir == 3)
 					y--;
-				goal.at(y, x) = v;
+				goal.setAt(y, x, v);
 				v++;
 			}
 			dir = (dir + 1) % 4;
 		}
 	}
-	goal._hash = goal.hash();
 	return goal;
-}
-
-// works only for size <= 4
-size_t Puzzle::hash() const
-{
-	size_t seed = 0;
-
-	for (int i = 0; i < this->_size * this->_size; i++)
-		seed |= static_cast<size_t>((*this)[i]) << (4 * i);
-
-	return seed;
 }
 
 void Puzzle::updateParameters()
 {
-	this->_h = Puzzle::heuristicFunction(*this);
-	this->_hash = this->hash();
-}
-
-size_t Puzzle::getHash() const
-{
-	return this->_hash;
+	this->setH();
 }
 
 int Puzzle::getH() const
@@ -292,14 +277,19 @@ int Puzzle::getH() const
 	return this->_h;
 }
 
-void Puzzle::setG(int value)
+void Puzzle::setH()
 {
-	this->_g = value;
+	this->_h = Puzzle::heuristicFunction ? Puzzle::heuristicFunction(*this) : 0;
 }
 
 int Puzzle::getG() const
 {
 	return this->_g;
+}
+
+void Puzzle::setG(int value)
+{
+	this->_g = value;
 }
 
 int Puzzle::getF() const

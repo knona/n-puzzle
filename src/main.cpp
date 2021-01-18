@@ -5,17 +5,13 @@
 #include "Puzzle.class.hpp"
 #include "utils.hpp"
 
-#include <algorithm>
 #include <boost/program_options.hpp>
 #include <cstdlib>
-#include <deque>
 #include <exception>
 #include <iostream>
 #include <list>
-#include <optional>
 #include <queue>
 #include <set>
-#include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -76,7 +72,7 @@ struct HashFunction
 {
 	size_t operator()(const Puzzle &puzzle) const
 	{
-		return puzzle.getHash();
+		return puzzle.getData();
 	}
 };
 
@@ -86,7 +82,7 @@ std::list<Puzzle> getList(std::unordered_map<Puzzle, Puzzle, HashFunction> &came
 	std::list<Puzzle> solution;
 
 	solution.push_front(goal);
-	while (solution.front().getHash() != start.getHash())
+	while (solution.front() != start)
 		solution.push_front(cameFrom[solution.front()]);
 
 	return solution;

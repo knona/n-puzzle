@@ -10,7 +10,7 @@ void Heuristic::init(int size)
 	for (int y = 0; y < size; y++)
 	{
 		for (int x = 0; x < size; x++)
-			Heuristic::goalMap[Heuristic::goal.at(y, x)] = { y, x };
+			Heuristic::goalMap[Heuristic::goal.getAt(y, x)] = { y, x };
 	}
 }
 
@@ -23,7 +23,7 @@ int Heuristic::manhattan(const Puzzle &puzzle)
 	{
 		for (int x = 0; x < size; x++)
 		{
-			Position &goalPos = Heuristic::goalMap[puzzle.at(y, x)];
+			Position &goalPos = Heuristic::goalMap[puzzle.getAt(y, x)];
 			total += std::abs(goalPos.y - y) + abs(goalPos.x - x);
 		}
 	}
