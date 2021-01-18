@@ -3,6 +3,7 @@
 #include "Parser.class.hpp"
 #include "Position.struct.hpp"
 #include "Puzzle.class.hpp"
+#include "PuzzlePriorityQueue.class.hpp"
 #include "utils.hpp"
 
 #include <boost/program_options.hpp>
@@ -44,55 +45,22 @@ int getOptions(int argc, const char **argv, Options &options)
 	return 1;
 }
 
-struct Compare
-{
-	bool operator()(const Puzzle &p1, const Puzzle &p2)
-	{
-		return (p1.getF() > p2.getF());
-	}
-};
-
-class MyQueue: public std::priority_queue<Puzzle, std::vector<Puzzle>, Compare>
-{
-	public:
-	bool hasValue(const Puzzle &puzzle) const
-	{
-		const Puzzle *addrStart = &this->top();
-		const Puzzle *addrEnd = &this->top() + this->size();
-		for (const Puzzle *it = addrStart; it != addrEnd; it++)
-		{
-			if (*it == puzzle)
-				return true;
-		}
-		return false;
-	}
-};
-
-struct HashFunction
-{
-	size_t operator()(const Puzzle &puzzle) const
-	{
-		return puzzle.getData();
-	}
-};
-
-std::list<Puzzle> getList(std::unordered_map<Puzzle, Puzzle, HashFunction> &cameFrom, const Puzzle &start,
-                          const Puzzle &goal)
+std::list<Puzzle> getList(std::unordered_map<size_t, size_t> &cameFrom, const Puzzle &start, const Puzzle &goal)
 {
 	std::list<Puzzle> solution;
 
 	solution.push_front(goal);
 	while (solution.front() != start)
-		solution.push_front(cameFrom[solution.front()]);
+		solution.push_front(Puzzle(start.getSize(), cameFrom[solution.front().getData()]));
 
 	return solution;
 }
 
 std::list<Puzzle> process(Puzzle &start, const Options &options)
 {
-	MyQueue                                          opened;
-	std::unordered_set<Puzzle, HashFunction>         closed;
-	std::unordered_map<Puzzle, Puzzle, HashFunction> cameFrom;
+	PuzzlePriorityQueue                opened;
+	std::unordered_set<size_t>         closed;
+	std::unordered_map<size_t, size_t> cameFrom;
 
 	Heuristic::init(start.getSize());
 	Puzzle::setHeuristicFunction(Heuristic::manhattan);
@@ -110,25 +78,25 @@ std::list<Puzzle> process(Puzzle &start, const Options &options)
 			return getList(cameFrom, start, goal);
 
 		opened.pop();
-		closed.insert(current);
+		closed.insert(current.getData());
 		for (Puzzle &child: current.getChildren())
 		{
-			bool foundInOpened = opened.hasValue(child);
-			bool foundInClosed = closed.find(child) != closed.end();
+			bool foundInOpened = opened.checkIsFound(child);
+			bool foundInClosed = closed.find(child.getData()) != closed.end();
 			if (!foundInOpened && !foundInClosed)
 			{
 				child.setG(current.getG() + 1);
-				cameFrom[child] = current;
-				opened.push(std::move(child));
+				cameFrom[child.getData()] = current.getData();
+				opened.push(child);
 			}
 			else if (child.getG() > current.getG() + 1)
 			{
 				child.setG(current.getG() + 1);
-				cameFrom[child] = current;
+				cameFrom[child.getData()] = current.getData();
 				if (foundInClosed)
 				{
-					closed.erase(child);
-					opened.push(std::move(child));
+					closed.erase(child.getData());
+					opened.push(child);
 				}
 			}
 		}
@@ -156,6 +124,8 @@ int main(int argc, char const *argv[])
 		start = parser.getPuzzle();
 		std::cout << "START" << std::endl;
 		std::cout << start << "-----" << std::endl << std::endl;
+		std::cout << "GOAL" << std::endl;
+		std::cout << Puzzle::getGoal(start.getSize()) << "-----" << std::endl << std::endl;
 		std::list<Puzzle> list = process(start, options);
 		for (const Puzzle &puzzle: list)
 			std::cout << puzzle << std::endl;

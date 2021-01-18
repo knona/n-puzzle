@@ -18,6 +18,13 @@ Puzzle::Puzzle(int size): _size(size), _data(0), _emptyPos { -1, -1 }, _g(std::n
 		throw std::runtime_error("The puzzle's size must be between 3 and 4");
 }
 
+Puzzle::Puzzle(int size, size_t data): _size(size), _data(data), _g(std::numeric_limits<int>::max())
+{
+	if (size < 3 || size > 4)
+		throw std::runtime_error("The puzzle's size must be between 3 and 4");
+	this->setZeroPosition();
+}
+
 Puzzle::Puzzle(const Puzzle &puzzle)
 {
 	*this = puzzle;
@@ -188,13 +195,16 @@ void Puzzle::setZeroPosition(const Position &pos)
 
 void Puzzle::setZeroPosition()
 {
-	for (int i = 0; i < this->_size * this->_size; i++)
+	for (int y = 0; y < this->_size; y++)
 	{
-		if ((*this)[i] == 0)
+		for (int x = 0; x < this->_size; x++)
 		{
-			this->_emptyPos.y = i / this->_size;
-			this->_emptyPos.x = i % this->_size;
-			break;
+			if (this->getAt(y, x) == 0)
+			{
+				this->_emptyPos.y = y;
+				this->_emptyPos.x = x;
+				return;
+			}
 		}
 	}
 	throw std::logic_error("0 value not found to define empty position");

@@ -26,6 +26,7 @@ class Puzzle
 	public:
 	Puzzle();
 	Puzzle(int size);
+	Puzzle(int size, size_t data);
 	Puzzle(const Puzzle &);
 	Puzzle &operator=(const Puzzle &);
 	Puzzle(Puzzle &&);
