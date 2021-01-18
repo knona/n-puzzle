@@ -15,25 +15,23 @@ typedef unsigned int uint;
 class Puzzle
 {
 	private:
-	int      _size;
 	size_t   _data;
 	Position _emptyPos;
 	int      _h;
 	int      _g;
 
-	static int (*heuristicFunction)(const Puzzle &);
+	static int _size;
+	static int (*_heuristicFunction)(const Puzzle &);
 
 	public:
 	Puzzle();
-	Puzzle(int size);
-	Puzzle(int size, size_t data);
+	Puzzle(size_t data);
 	Puzzle(const Puzzle &);
 	Puzzle &operator=(const Puzzle &);
 	Puzzle(Puzzle &&);
 	Puzzle &operator=(Puzzle &&);
 	~Puzzle();
 
-	int                   getSize() const;
 	size_t                getData() const;
 	int                   operator[](int index) const;
 	int                   getAt(int index) const;
@@ -59,7 +57,10 @@ class Puzzle
 	void                  setG(int value);
 	int                   getF() const;
 
-	static Puzzle getGoal(int size);
+	static int    getSize();
+	static bool   isSizeSet();
+	static void   setSize(int size);
+	static Puzzle getGoal();
 	static void   setHeuristicFunction(int (*heuristicFunction)(const Puzzle &));
 };
 

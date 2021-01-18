@@ -13,7 +13,7 @@ class Heuristic
 	public:
 	static int  manhattan(const Puzzle &puzzle);
 	static int  hamming(const Puzzle &puzzle);
-	static void init(int size);
+	static void init();
 };
 
 #endif // !HEURISTIC_HPP

@@ -51,7 +51,7 @@ std::list<Puzzle> getList(std::unordered_map<size_t, size_t> &cameFrom, const Pu
 
 	solution.push_front(goal);
 	while (solution.front() != start)
-		solution.push_front(Puzzle(start.getSize(), cameFrom[solution.front().getData()]));
+		solution.push_front(Puzzle(cameFrom[solution.front().getData()]));
 
 	return solution;
 }
@@ -62,9 +62,9 @@ std::list<Puzzle> process(Puzzle &start, const Options &options)
 	std::unordered_set<size_t>         closed;
 	std::unordered_map<size_t, size_t> cameFrom;
 
-	Heuristic::init(start.getSize());
+	Heuristic::init();
 	Puzzle::setHeuristicFunction(Heuristic::manhattan);
-	Puzzle goal = Puzzle::getGoal(start.getSize());
+	Puzzle goal = Puzzle::getGoal();
 
 	start.setG(0);
 	start.updateParameters();
@@ -125,7 +125,7 @@ int main(int argc, char const *argv[])
 		std::cout << "START" << std::endl;
 		std::cout << start << "-----" << std::endl << std::endl;
 		std::cout << "GOAL" << std::endl;
-		std::cout << Puzzle::getGoal(start.getSize()) << "-----" << std::endl << std::endl;
+		std::cout << Puzzle::getGoal() << "-----" << std::endl << std::endl;
 		std::list<Puzzle> list = process(start, options);
 		for (const Puzzle &puzzle: list)
 			std::cout << puzzle << std::endl;

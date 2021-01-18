@@ -6,7 +6,7 @@
 #include <exception>
 #include <iostream>
 
-Parser::Parser(const std::optional<std::string> &file): _file(file), _rows(0), _pos { 1, 1 }, _isSizeSet(false)
+Parser::Parser(const std::optional<std::string> &file): _file(file), _rows(0), _pos { 1, 1 }
 {}
 
 Parser::~Parser()
@@ -86,15 +86,14 @@ void Parser::setPuzzleSize(const std::string &line, int &i)
 		;
 	if (i != static_cast<int>(line.length()) && line[i] != '#')
 		throw Exception::ParserLight("Puzzle's size is required", false);
-	this->_puzzle = Puzzle(size);
-	this->_isSizeSet = true;
+	Puzzle::setSize(size);
 }
 
 void Parser::setPuzzleRow(const std::string &line, int &i)
 {
 	int    cols = 0;
 	int    n;
-	int    size = this->_puzzle.getSize();
+	int    size = Puzzle::getSize();
 	size_t nbChars;
 
 	if (size == this->_rows)
@@ -132,14 +131,14 @@ void Parser::parseFromStream(std::istream &stream, std::string &line)
 			;
 		if (i == static_cast<int>(line.length()) || line[i] == '#')
 			continue;
-		if (!this->_isSizeSet)
+		if (!Puzzle::isSizeSet())
 			this->setPuzzleSize(line, i);
 		else
 			this->setPuzzleRow(line, i);
 	}
-	if (!this->_isSizeSet)
+	if (!Puzzle::isSizeSet())
 		throw Exception::ParserLight("Invalid file", false);
-	if (this->_puzzle.getSize() != this->_rows)
+	if (Puzzle::getSize() != this->_rows)
 		throw Exception::ParserLight("The number of rows does not match the given size", false);
 }
 

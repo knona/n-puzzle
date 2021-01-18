@@ -3,9 +3,10 @@
 Puzzle          Heuristic::goal;
 Array<Position> Heuristic::goalMap;
 
-void Heuristic::init(int size)
+void Heuristic::init()
 {
-	Heuristic::goal = Puzzle::getGoal(size);
+	int size = Puzzle::getSize();
+	Heuristic::goal = Puzzle::getGoal();
 	Heuristic::goalMap = Array<Position>(size * size);
 	for (int y = 0; y < size; y++)
 	{
@@ -16,7 +17,7 @@ void Heuristic::init(int size)
 
 int Heuristic::manhattan(const Puzzle &puzzle)
 {
-	int size = puzzle.getSize();
+	int size = Puzzle::getSize();
 	int total = 0;
 
 	for (int y = 0; y < size; y++)
@@ -32,7 +33,7 @@ int Heuristic::manhattan(const Puzzle &puzzle)
 
 int Heuristic::hamming(const Puzzle &puzzle)
 {
-	int size = puzzle.getSize();
+	int size = Puzzle::getSize();
 	int total = 0;
 
 	for (int i = 0; i < size * size; i++)

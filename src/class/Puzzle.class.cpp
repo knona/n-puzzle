@@ -7,21 +7,15 @@
 #include <iomanip>
 #include <utility>
 
-int (*Puzzle::heuristicFunction)(const Puzzle &) = nullptr;
+int (*Puzzle::_heuristicFunction)(const Puzzle &) = nullptr;
 
-Puzzle::Puzzle(): _size(3), _data(0), _emptyPos { -1, -1 }, _g(std::numeric_limits<int>::max())
+int Puzzle::_size = 0;
+
+Puzzle::Puzzle(): _data(0), _emptyPos { -1, -1 }, _g(std::numeric_limits<int>::max())
 {}
 
-Puzzle::Puzzle(int size): _size(size), _data(0), _emptyPos { -1, -1 }, _g(std::numeric_limits<int>::max())
+Puzzle::Puzzle(size_t data): _data(data), _g(std::numeric_limits<int>::max())
 {
-	if (size < 3 || size > 4)
-		throw std::runtime_error("The puzzle's size must be between 3 and 4");
-}
-
-Puzzle::Puzzle(int size, size_t data): _size(size), _data(data), _g(std::numeric_limits<int>::max())
-{
-	if (size < 3 || size > 4)
-		throw std::runtime_error("The puzzle's size must be between 3 and 4");
 	this->setZeroPosition();
 }
 
@@ -40,7 +34,6 @@ Puzzle &Puzzle::operator=(const Puzzle &puzzle)
 	if (this != &puzzle)
 	{
 		this->_data = puzzle._data;
-		this->_size = puzzle._size;
 		this->_emptyPos = puzzle._emptyPos;
 		this->_h = puzzle._h;
 		this->_g = puzzle._g;
@@ -53,7 +46,6 @@ Puzzle &Puzzle::operator=(Puzzle &&puzzle)
 	if (this != &puzzle)
 	{
 		this->_data = puzzle._data;
-		this->_size = puzzle._size;
 		this->_emptyPos = puzzle._emptyPos;
 		this->_h = puzzle._h;
 		this->_g = puzzle._g;
@@ -64,9 +56,21 @@ Puzzle &Puzzle::operator=(Puzzle &&puzzle)
 Puzzle::~Puzzle()
 {}
 
-int Puzzle::getSize() const
+int Puzzle::getSize()
 {
-	return this->_size;
+	return Puzzle::_size;
+}
+
+void Puzzle::setSize(int size)
+{
+	if (size < 3 || size > 4)
+		throw std::runtime_error("The puzzle's size must be between 3 and 4");
+	Puzzle::_size = size;
+}
+
+bool Puzzle::isSizeSet()
+{
+	return Puzzle::_size != 0;
 }
 
 size_t Puzzle::getData() const
@@ -76,21 +80,21 @@ size_t Puzzle::getData() const
 
 int Puzzle::operator[](int index) const
 {
-	if (index >= this->_size * this->_size)
+	if (index >= Puzzle::_size * Puzzle::_size)
 		throw std::out_of_range(catArgs(index, " is out of range"));
 	return (this->_data >> (index * 4)) & 0xF;
 }
 
 int Puzzle::getAt(int index) const
 {
-	if (index >= this->_size * this->_size)
+	if (index >= Puzzle::_size * Puzzle::_size)
 		throw std::out_of_range(catArgs(index, " is out of range"));
 	return (this->_data >> (index * 4)) & 0xF;
 }
 
 void Puzzle::setAt(int index, int value)
 {
-	if (index >= this->_size * this->_size)
+	if (index >= Puzzle::_size * Puzzle::_size)
 		throw std::out_of_range(catArgs(index, " is out of range"));
 	this->_data &= ~(0xFL << (index * 4));
 	this->_data |= (static_cast<size_t>(value) << (index * 4));
@@ -98,40 +102,40 @@ void Puzzle::setAt(int index, int value)
 
 int Puzzle::getAt(int y, int x) const
 {
-	if (y >= this->_size)
+	if (y >= Puzzle::_size)
 		throw std::out_of_range(catArgs(y, " is out of range"));
-	if (x >= this->_size)
+	if (x >= Puzzle::_size)
 		throw std::out_of_range(catArgs(x, " is out of range"));
-	return (this->_data >> ((y * this->_size + x) * 4)) & 0xF;
+	return (this->_data >> ((y * Puzzle::_size + x) * 4)) & 0xF;
 }
 
 void Puzzle::setAt(int y, int x, int value)
 {
-	if (y >= this->_size)
+	if (y >= Puzzle::_size)
 		throw std::out_of_range(catArgs(y, " is out of range"));
-	if (x >= this->_size)
+	if (x >= Puzzle::_size)
 		throw std::out_of_range(catArgs(x, " is out of range"));
-	this->_data &= ~(0xFL << ((y * this->_size + x) * 4));
-	this->_data |= (static_cast<size_t>(value) << ((y * this->_size + x) * 4));
+	this->_data &= ~(0xFL << ((y * Puzzle::_size + x) * 4));
+	this->_data |= (static_cast<size_t>(value) << ((y * Puzzle::_size + x) * 4));
 }
 
 int Puzzle::getAt(const Position &pos) const
 {
-	if (pos.y >= this->_size)
+	if (pos.y >= Puzzle::_size)
 		throw std::out_of_range(catArgs(pos.y, " is out of range"));
-	if (pos.x >= this->_size)
+	if (pos.x >= Puzzle::_size)
 		throw std::out_of_range(catArgs(pos.x, " is out of range"));
-	return (this->_data >> ((pos.y * this->_size + pos.x) * 4)) & 0xF;
+	return (this->_data >> ((pos.y * Puzzle::_size + pos.x) * 4)) & 0xF;
 }
 
 void Puzzle::setAt(const Position &pos, int value)
 {
-	if (pos.y >= this->_size)
+	if (pos.y >= Puzzle::_size)
 		throw std::out_of_range(catArgs(pos.y, " is out of range"));
-	if (pos.x >= this->_size)
+	if (pos.x >= Puzzle::_size)
 		throw std::out_of_range(catArgs(pos.x, " is out of range"));
-	this->_data &= ~(0xFL << ((pos.y * this->_size + pos.x) * 4));
-	this->_data |= (static_cast<size_t>(value) << ((pos.y * this->_size + pos.x) * 4));
+	this->_data &= ~(0xFL << ((pos.y * Puzzle::_size + pos.x) * 4));
+	this->_data |= (static_cast<size_t>(value) << ((pos.y * Puzzle::_size + pos.x) * 4));
 }
 
 bool Puzzle::operator==(const Puzzle &puzzle) const
@@ -166,13 +170,13 @@ void Puzzle::swap(const Position &pos1, const Position &pos2)
 
 void Puzzle::print(std::ostream &os, bool displaySize) const
 {
-	int width = std::to_string(this->_size * this->_size - 1).length();
+	int width = std::to_string(Puzzle::_size * Puzzle::_size - 1).length();
 
 	if (displaySize)
-		os << this->_size << std::endl;
-	for (int i = 0; i < this->_size; i++)
+		os << Puzzle::_size << std::endl;
+	for (int i = 0; i < Puzzle::_size; i++)
 	{
-		for (int j = 0; j < this->_size; j++)
+		for (int j = 0; j < Puzzle::_size; j++)
 		{
 			if (j != 0)
 				os << " ";
@@ -195,9 +199,9 @@ void Puzzle::setZeroPosition(const Position &pos)
 
 void Puzzle::setZeroPosition()
 {
-	for (int y = 0; y < this->_size; y++)
+	for (int y = 0; y < Puzzle::_size; y++)
 	{
-		for (int x = 0; x < this->_size; x++)
+		for (int x = 0; x < Puzzle::_size; x++)
 		{
 			if (this->getAt(y, x) == 0)
 			{
@@ -226,7 +230,7 @@ std::optional<Puzzle> Puzzle::move(Move direction) const
 	else if (direction == Move::Left)
 		newPos.x++;
 
-	if (newPos.y >= this->_size || newPos.y < 0 || newPos.x >= this->_size || newPos.x < 0)
+	if (newPos.y >= Puzzle::_size || newPos.y < 0 || newPos.x >= Puzzle::_size || newPos.x < 0)
 		return {};
 
 	Puzzle newPuzzle(*this);
@@ -249,14 +253,14 @@ std::list<Puzzle> Puzzle::getChildren() const
 	return children;
 }
 
-Puzzle Puzzle::getGoal(int size)
+Puzzle Puzzle::getGoal()
 {
-	Puzzle goal(size);
-	int    dir = 0, nb = size, v = 1, x = -1, y = 0;
+	Puzzle goal;
+	int    dir = 0, nb = Puzzle::_size, v = 1, x = -1, y = 0;
 
-	for (; v != size * size; nb--)
+	for (; v != Puzzle::_size * Puzzle::_size; nb--)
 	{
-		for (int i = nb == size || nb == 1 ? 1 : 0; i < 2; i++)
+		for (int i = nb == Puzzle::_size || nb == 1 ? 1 : 0; i < 2; i++)
 		{
 			for (int j = 0; j < nb; j++)
 			{
@@ -289,7 +293,7 @@ int Puzzle::getH() const
 
 void Puzzle::setH()
 {
-	this->_h = Puzzle::heuristicFunction ? Puzzle::heuristicFunction(*this) : 0;
+	this->_h = Puzzle::_heuristicFunction ? Puzzle::_heuristicFunction(*this) : 0;
 }
 
 int Puzzle::getG() const
@@ -309,5 +313,5 @@ int Puzzle::getF() const
 
 void Puzzle::setHeuristicFunction(int (*heuristicFunction)(const Puzzle &))
 {
-	Puzzle::heuristicFunction = heuristicFunction;
+	Puzzle::_heuristicFunction = heuristicFunction;
 }
