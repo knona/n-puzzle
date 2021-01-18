@@ -9,7 +9,7 @@
 
 int (*Puzzle::heuristicFunction)(const Puzzle &) = nullptr;
 
-Puzzle::Puzzle(): _size(0), _data(0), _emptyPos { -1, -1 }, _g(std::numeric_limits<int>::max())
+Puzzle::Puzzle(): _size(3), _data(0), _emptyPos { -1, -1 }, _g(std::numeric_limits<int>::max())
 {}
 
 Puzzle::Puzzle(int size): _size(size), _data(0), _emptyPos { -1, -1 }, _g(std::numeric_limits<int>::max())

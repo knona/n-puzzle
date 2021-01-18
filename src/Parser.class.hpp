@@ -21,6 +21,7 @@ class Parser
 
 	int          _rows;
 	FilePosition _pos;
+	bool         _isSizeSet;
 
 	public:
 	Parser() = delete;

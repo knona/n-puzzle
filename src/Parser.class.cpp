@@ -6,7 +6,7 @@
 #include <exception>
 #include <iostream>
 
-Parser::Parser(const std::optional<std::string> &file): _file(file), _rows(0), _pos { 1, 1 }
+Parser::Parser(const std::optional<std::string> &file): _file(file), _rows(0), _pos { 1, 1 }, _isSizeSet(false)
 {}
 
 Parser::~Parser()
@@ -87,6 +87,7 @@ void Parser::setPuzzleSize(const std::string &line, int &i)
 	if (i != static_cast<int>(line.length()) && line[i] != '#')
 		throw Exception::ParserLight("Puzzle's size is required", false);
 	this->_puzzle = Puzzle(size);
+	this->_isSizeSet = true;
 }
 
 void Parser::setPuzzleRow(const std::string &line, int &i)
@@ -131,12 +132,12 @@ void Parser::parseFromStream(std::istream &stream, std::string &line)
 			;
 		if (i == static_cast<int>(line.length()) || line[i] == '#')
 			continue;
-		if (this->_puzzle.getSize() == 0)
+		if (!this->_isSizeSet)
 			this->setPuzzleSize(line, i);
 		else
 			this->setPuzzleRow(line, i);
 	}
-	if (this->_puzzle.getSize() == 0)
+	if (!this->_isSizeSet)
 		throw Exception::ParserLight("Invalid file", false);
 	if (this->_puzzle.getSize() != this->_rows)
 		throw Exception::ParserLight("The number of rows does not match the given size", false);
