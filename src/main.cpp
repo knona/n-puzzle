@@ -1,3 +1,4 @@
+#include "Gui.class.hpp"
 #include "Heuristic.class.hpp"
 #include "Options.struct.hpp"
 #include "Parser.class.hpp"
@@ -104,12 +105,11 @@ std::list<Puzzle> process(Puzzle &start, const Options &options)
 	return {};
 }
 
-void render(const std::vector<Puzzle> &puzzles);
-
 int main(int argc, char const *argv[])
 {
 	Options options;
 	Puzzle  start;
+	Gui     gui;
 
 	try
 	{
@@ -124,12 +124,10 @@ int main(int argc, char const *argv[])
 			return 0;
 		}
 		start = parser.getPuzzle();
-		std::cout << "START" << std::endl;
-		std::cout << start << "-----" << std::endl << std::endl;
-		std::cout << "GOAL" << std::endl;
-		std::cout << Puzzle::getGoal() << "-----" << std::endl << std::endl;
+		std::cout << "\033[0;33mProcessing...\033[0m" << std::endl;
 		std::list<Puzzle> list = process(start, options);
-		render(std::vector<Puzzle>(list.begin(), list.end()));
+		gui.init();
+		gui.render(std::vector<Puzzle>(list.begin(), list.end()));
 	}
 	catch (const std::exception &e)
 	{
