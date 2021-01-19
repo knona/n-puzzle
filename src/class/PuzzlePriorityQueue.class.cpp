@@ -43,29 +43,29 @@ PuzzlePriorityQueue::~PuzzlePriorityQueue()
 
 int PuzzlePriorityQueue::size()
 {
-	return _queue.size();
+	return this->_queue.size();
 }
 
 bool PuzzlePriorityQueue::empty()
 {
-	return _queue.empty();
+	return this->_queue.empty();
 }
 
 void PuzzlePriorityQueue::push(const Puzzle &puzzle)
 {
-	_queue.push(puzzle);
-	_umap.insert(puzzle.getData());
+	this->_queue.push(puzzle);
+	this->_umap.insert(puzzle.getData());
 }
 
 const Puzzle &PuzzlePriorityQueue::top() const
 {
-	return _queue.top();
+	return this->_queue.top();
 }
 
 void PuzzlePriorityQueue::pop()
 {
-	_umap.erase(this->top().getData());
-	_queue.pop();
+	this->_umap.erase(this->top().getData());
+	this->_queue.pop();
 }
 
 bool PuzzlePriorityQueue::checkIsFound(const Puzzle &puzzle) const

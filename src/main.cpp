@@ -1,3 +1,4 @@
+#include "Gui.class.hpp"
 #include "Heuristic.class.hpp"
 #include "Options.struct.hpp"
 #include "Parser.class.hpp"
@@ -26,10 +27,11 @@ int getOptions(int argc, const char **argv, Options &options)
 	std::string file;
 
 	po::options_description desc(catArgs("Usage: ", argv[0], " [options]\nOptions"));
-	desc.add_options()                                                                   //
-		("help,h", "Produce help message")                                               //
-		("parse-only,p", "Parse input and display the puzzle")                           //
-		("file,f", po::value<std::string>(), "Path to the puzzle file (default stdin)"); //
+	desc.add_options()                                                                  //
+		("help,h", "Produce help message")                                              //
+		("parse-only,p", "Parse input and display the puzzle")                          //
+		("file,f", po::value<std::string>(), "Path to the puzzle file (default stdin)") //
+		("gui,g", "Enable the gui");                                                    //
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);
@@ -42,6 +44,7 @@ int getOptions(int argc, const char **argv, Options &options)
 	if (vm.count("file"))
 		options.file = vm["file"].as<std::string>();
 	options.parseOnly = static_cast<bool>(vm.count("parse-only"));
+	options.enableGui = static_cast<bool>(vm.count("gui"));
 	return 1;
 }
 
@@ -108,6 +111,7 @@ int main(int argc, char const *argv[])
 {
 	Options options;
 	Puzzle  start;
+	Gui     gui;
 
 	try
 	{
@@ -122,13 +126,18 @@ int main(int argc, char const *argv[])
 			return 0;
 		}
 		start = parser.getPuzzle();
-		std::cout << "START" << std::endl;
-		std::cout << start << "-----" << std::endl << std::endl;
-		std::cout << "GOAL" << std::endl;
-		std::cout << Puzzle::getGoal() << "-----" << std::endl << std::endl;
+		std::cout << "\033[0;33mProcessing...\033[0m" << std::endl;
 		std::list<Puzzle> list = process(start, options);
-		for (const Puzzle &puzzle: list)
-			std::cout << puzzle << std::endl;
+		if (options.enableGui)
+		{
+			std::cout << "Commands: " << std::endl;
+			std::cout << "    - Speed up / down : \033[0;33mArrow Up / Down\033[0m" << std::endl;
+			std::cout << "    - Previous / next state : \033[0;33mArrow Left / Right\033[0m" << std::endl;
+			std::cout << "    - Pause: \033[0;33mSpace\033[0m" << std::endl;
+			std::cout << "    - Reset to initial state : \033[0;33mR\033[0m" << std::endl;
+			gui.init();
+			gui.render(std::vector<Puzzle>(list.begin(), list.end()));
+		}
 	}
 	catch (const std::exception &e)
 	{

@@ -8,6 +8,7 @@ struct Options
 {
 	bool                       parseOnly;
 	std::optional<std::string> file;
+	bool                       enableGui;
 };
 
 #endif // !OPTIONS_HPP
