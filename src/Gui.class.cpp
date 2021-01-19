@@ -81,7 +81,7 @@ void Gui::drawFooter(int index, int indexMax)
 	text.setFont(_font);
 	text.setCharacterSize(textSize);
 	text.setFillColor({ 255, 255, 255 });
-	text.setString(catArgs("Speed ", _speedIndex, smallWidth ? "\n" : "    ", "Puzzle ", index, "/", indexMax));
+	text.setString(catArgs("Speed ", _speedIndex, smallWidth ? "\n" : "    ", "State ", index, "/", indexMax));
 	textWidth = text.getLocalBounds().width;
 	textHeight = 1.15 * text.getLocalBounds().height;
 	text.setPosition((_width - textWidth) / 2, (_footerHeight - textHeight) / 2 + footerY);

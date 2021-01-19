@@ -132,7 +132,7 @@ int main(int argc, char const *argv[])
 		{
 			std::cout << "Commands: " << std::endl;
 			std::cout << "    - Speed up / down : \033[0;33mArrow Up / Down\033[0m" << std::endl;
-			std::cout << "    - Previous / next puzzle : \033[0;33mArrow Left / Right\033[0m" << std::endl;
+			std::cout << "    - Previous / next state : \033[0;33mArrow Left / Right\033[0m" << std::endl;
 			std::cout << "    - Pause: \033[0;33mSpace\033[0m" << std::endl;
 			std::cout << "    - Reset to initial state : \033[0;33mR\033[0m" << std::endl;
 			gui.init();
