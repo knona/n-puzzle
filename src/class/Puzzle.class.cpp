@@ -191,6 +191,19 @@ Position Puzzle::find(int nb) const
 	throw std::logic_error(catArgs("Number ", nb, " not found in puzzle"));
 }
 
+Array<Position> Puzzle::getPuzzleMap() const
+{
+	int             size = Puzzle::getSize();
+	Array<Position> map(size * size);
+
+	for (int y = 0; y < size; y++)
+	{
+		for (int x = 0; x < size; x++)
+			map[this->getAt(y, x)] = { y, x };
+	}
+	return map;
+}
+
 void Puzzle::print(std::ostream &os, bool displaySize) const
 {
 	int width = std::to_string(Puzzle::_size * Puzzle::_size - 1).length();
@@ -312,14 +325,7 @@ const Puzzle &Puzzle::getGoal()
 
 void Puzzle::setGoalMap()
 {
-	int size = Puzzle::getSize();
-
-	Puzzle::_goalMap = Array<Position>(size * size);
-	for (int y = 0; y < size; y++)
-	{
-		for (int x = 0; x < size; x++)
-			Puzzle::_goalMap[Puzzle::_goal.getAt(y, x)] = { y, x };
-	}
+	Puzzle::_goalMap = Puzzle::_goal.getPuzzleMap();
 }
 
 const Array<Position> &Puzzle::getGoalMap()

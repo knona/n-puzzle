@@ -56,6 +56,7 @@ class Puzzle
 	void                  swap(int y1, int x1, int y2, int x2);
 	void                  swap(const Position &pos1, const Position &pos2);
 	Position              find(int nb) const;
+	Array<Position>       getPuzzleMap() const;
 	void                  print(std::ostream &os = std::cout, bool displaySize = false) const;
 	void                  setZeroPosition(const Position &pos);
 	void                  setZeroPosition();
