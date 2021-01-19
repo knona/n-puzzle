@@ -28,7 +28,7 @@ INCLUDES = $(addprefix -I, $(call uniq,$(SRCS_MAIN_DIR) $(HEADERS_DIRS)))
 
 # COMPILATEUR
 CC		= clang++
-CFLAGS	= -Wall -Wextra -g3 --std=c++17
+CFLAGS	= -Wall -Wextra --std=c++17 -Ofast
 
 # TEXT
 RED = \033[31m

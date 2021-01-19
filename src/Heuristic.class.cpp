@@ -31,8 +31,6 @@ int Heuristic::manhattan(const Puzzle &puzzle)
 	return total;
 }
 
-//////////////////////////////////////////////////////////////////
-
 // Aim of the function :
 // Returns the amount of linear conflicts in a given row, for a given tile, according to the conflict definition:
 // Two tiles tj and tk are in a linear conflict if tj and tk are in the same line, the goal positions of tj and tk are both in that line,
@@ -199,8 +197,6 @@ int Heuristic::linear_conflicts(const Puzzle &puzzle)
 	Array<int> crn(size, 0);// conflicts row number
 	Array<int> ccn(size, 0);// conflicts column number
 	int nb_lc = 0;// score linear conflicts
-
-
 	
 	// Loop on rows
 	for (int row = 0; row < size; row++)
