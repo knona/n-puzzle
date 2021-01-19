@@ -236,7 +236,6 @@ std::optional<Puzzle> Puzzle::move(Move direction) const
 	Puzzle newPuzzle(*this);
 	newPuzzle.swap(newPuzzle._emptyPos, newPos);
 	newPuzzle._emptyPos = newPos;
-	newPuzzle.updateParameters();
 	return newPuzzle;
 }
 
@@ -279,11 +278,6 @@ Puzzle Puzzle::getGoal()
 		}
 	}
 	return goal;
-}
-
-void Puzzle::updateParameters()
-{
-	this->setH();
 }
 
 int Puzzle::getH() const

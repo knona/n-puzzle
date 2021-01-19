@@ -50,7 +50,6 @@ class Puzzle
 	void                  setZeroPosition();
 	std::optional<Puzzle> move(Move direction) const;
 	std::list<Puzzle>     getChildren() const;
-	void                  updateParameters();
 	int                   getH() const;
 	void                  setH();
 	int                   getG() const;
