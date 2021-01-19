@@ -112,7 +112,6 @@ int main(int argc, char const *argv[])
 {
 	Options options;
 	Puzzle  start;
-	Gui     gui;
 
 	try
 	{
@@ -136,6 +135,7 @@ int main(int argc, char const *argv[])
 			std::cout << "    - Previous / next state : \033[0;33mArrow Left / Right\033[0m" << std::endl;
 			std::cout << "    - Pause: \033[0;33mSpace\033[0m" << std::endl;
 			std::cout << "    - Reset to initial state : \033[0;33mR\033[0m" << std::endl;
+			Gui     gui;
 			gui.init();
 			gui.render(std::vector<Puzzle>(list.begin(), list.end()));
 		}
