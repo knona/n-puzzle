@@ -8,8 +8,9 @@
 #include <utility>
 
 int (*Puzzle::_heuristicFunction)(const Puzzle &) = nullptr;
-
-int Puzzle::_size = 0;
+int             Puzzle::_size = 0;
+Puzzle          Puzzle::_goal;
+Array<Position> Puzzle::_goalMap;
 
 Puzzle::Puzzle(): _data(0), _emptyPos { -1, -1 }, _g(std::numeric_limits<int>::max())
 {}
@@ -66,6 +67,8 @@ void Puzzle::setSize(int size)
 	if (size < 3 || size > 4)
 		throw std::runtime_error("The puzzle's size must be between 3 and 4");
 	Puzzle::_size = size;
+	Puzzle::setGoal();
+	Puzzle::setGoalMap();
 }
 
 bool Puzzle::isSizeSet()
@@ -76,6 +79,11 @@ bool Puzzle::isSizeSet()
 size_t Puzzle::getData() const
 {
 	return this->_data;
+}
+
+const Position Puzzle::getEmptyPos() const
+{
+	return this->_emptyPos;
 }
 
 int Puzzle::operator[](int index) const
@@ -168,6 +176,21 @@ void Puzzle::swap(const Position &pos1, const Position &pos2)
 	this->setAt(pos2, tmp);
 }
 
+Position Puzzle::find(int nb) const
+{
+	int size = Puzzle::getSize();
+
+	for (int y = 0; y < size; y++)
+	{
+		for (int x = 0; x < size; x++)
+		{
+			if (this->getAt(y, x) == nb)
+				return { y, x };
+		}
+	}
+	throw std::logic_error(catArgs("Number ", nb, " not found in puzzle"));
+}
+
 void Puzzle::print(std::ostream &os, bool displaySize) const
 {
 	int width = std::to_string(Puzzle::_size * Puzzle::_size - 1).length();
@@ -252,10 +275,13 @@ std::list<Puzzle> Puzzle::getChildren() const
 	return children;
 }
 
-Puzzle Puzzle::getGoal()
+void Puzzle::setGoal()
 {
-	Puzzle goal;
-	int    dir = 0, nb = Puzzle::_size, v = 1, x = -1, y = 0;
+	int dir = 0;
+	int nb = Puzzle::_size;
+	int v = 1;
+	int x = -1;
+	int y = 0;
 
 	for (; v != Puzzle::_size * Puzzle::_size; nb--)
 	{
@@ -271,13 +297,34 @@ Puzzle Puzzle::getGoal()
 					x--;
 				if (dir == 3)
 					y--;
-				goal.setAt(y, x, v);
+				Puzzle::_goal.setAt(y, x, v);
 				v++;
 			}
 			dir = (dir + 1) % 4;
 		}
 	}
-	return goal;
+}
+
+const Puzzle &Puzzle::getGoal()
+{
+	return Puzzle::_goal;
+}
+
+void Puzzle::setGoalMap()
+{
+	int size = Puzzle::getSize();
+
+	Puzzle::_goalMap = Array<Position>(size * size);
+	for (int y = 0; y < size; y++)
+	{
+		for (int x = 0; x < size; x++)
+			Puzzle::_goalMap[Puzzle::_goal.getAt(y, x)] = { y, x };
+	}
+}
+
+const Array<Position> &Puzzle::getGoalMap()
+{
+	return Puzzle::_goalMap;
 }
 
 int Puzzle::getH() const
@@ -308,4 +355,37 @@ int Puzzle::getF() const
 void Puzzle::setHeuristicFunction(int (*heuristicFunction)(const Puzzle &))
 {
 	Puzzle::_heuristicFunction = heuristicFunction;
+}
+
+int Puzzle::getEmptyParity() const
+{
+	const Array<Position> &goalMap = Puzzle::getGoalMap();
+	const Position &       emptyPos = this->getEmptyPos();
+	const Position &       goalPos = goalMap[0];
+	return (std::abs(goalPos.y - emptyPos.y) + abs(goalPos.x - emptyPos.x)) % 2;
+}
+
+int Puzzle::getPuzzleParity() const
+{
+	const Array<Position> &goalMap = Puzzle::getGoalMap();
+	Puzzle                 puzzle(*this);
+	int                    size = Puzzle::getSize();
+	int                    nbTransitions = 0;
+
+	for (int i = 0; i < size * size; i++)
+	{
+		Position        puzzlePos = puzzle.find(i);
+		const Position &goalPos = goalMap[i];
+		if (i != puzzle.getAt(goalPos))
+		{
+			puzzle.swap(puzzlePos, goalPos);
+			nbTransitions++;
+		}
+	}
+	return nbTransitions % 2;
+}
+
+bool Puzzle::checkIsSolvable() const
+{
+	return Puzzle::getEmptyParity() == Puzzle::getPuzzleParity();
 }

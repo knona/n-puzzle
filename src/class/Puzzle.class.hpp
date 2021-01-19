@@ -1,6 +1,7 @@
 #ifndef PUZZLE_HPP
 #define PUZZLE_HPP
 
+#include "Array.class.hpp"
 #include "Move.enum.hpp"
 #include "Position.struct.hpp"
 
@@ -20,8 +21,16 @@ class Puzzle
 	int      _h;
 	int      _g;
 
-	static int _size;
+	int getEmptyParity() const;
+	int getPuzzleParity() const;
+
+	static int             _size;
+	static Puzzle          _goal;
+	static Array<Position> _goalMap;
 	static int (*_heuristicFunction)(const Puzzle &);
+
+	static void setGoal();
+	static void setGoalMap();
 
 	public:
 	Puzzle();
@@ -33,6 +42,7 @@ class Puzzle
 	~Puzzle();
 
 	size_t                getData() const;
+	const Position        getEmptyPos() const;
 	int                   operator[](int index) const;
 	int                   getAt(int index) const;
 	void                  setAt(int index, int value);
@@ -45,6 +55,7 @@ class Puzzle
 	void                  swap(int index1, int index2);
 	void                  swap(int y1, int x1, int y2, int x2);
 	void                  swap(const Position &pos1, const Position &pos2);
+	Position              find(int nb) const;
 	void                  print(std::ostream &os = std::cout, bool displaySize = false) const;
 	void                  setZeroPosition(const Position &pos);
 	void                  setZeroPosition();
@@ -55,12 +66,14 @@ class Puzzle
 	int                   getG() const;
 	void                  setG(int value);
 	int                   getF() const;
+	bool                  checkIsSolvable() const;
 
-	static int    getSize();
-	static bool   isSizeSet();
-	static void   setSize(int size);
-	static Puzzle getGoal();
-	static void   setHeuristicFunction(int (*heuristicFunction)(const Puzzle &));
+	static int                    getSize();
+	static bool                   isSizeSet();
+	static void                   setSize(int size);
+	static const Puzzle &         getGoal();
+	static const Array<Position> &getGoalMap();
+	static void                   setHeuristicFunction(int (*heuristicFunction)(const Puzzle &));
 };
 
 std::ostream &operator<<(std::ostream &os, const Puzzle &puz);

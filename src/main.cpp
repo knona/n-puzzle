@@ -127,6 +127,8 @@ int main(int argc, char const *argv[])
 			return 0;
 		}
 		start = parser.getPuzzle();
+		if (!start.checkIsSolvable())
+			throw std::runtime_error("The puzzle is unsolvable");
 		std::cout << "\033[0;33mProcessing...\033[0m" << std::endl;
 		std::list<Puzzle> list = process(start, options);
 		if (options.enableGui)
