@@ -63,7 +63,8 @@ std::list<Puzzle> process(Puzzle &start, const Options &options)
 	std::unordered_map<size_t, size_t> cameFrom;
 
 	Heuristic::init();
-	Puzzle::setHeuristicFunction(Heuristic::manhattan);
+	// Puzzle::setHeuristicFunction(Heuristic::manhattan);
+	Puzzle::setHeuristicFunction(Heuristic::linear_conflicts);
 	Puzzle goal = Puzzle::getGoal();
 
 	start.setG(0);
