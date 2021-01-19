@@ -104,7 +104,7 @@ std::list<Puzzle> process(Puzzle &start, const Options &options)
 	return {};
 }
 
-void render(const std::list<Puzzle> &list);
+void render(const std::vector<Puzzle> &puzzles);
 
 int main(int argc, char const *argv[])
 {
@@ -129,7 +129,7 @@ int main(int argc, char const *argv[])
 		std::cout << "GOAL" << std::endl;
 		std::cout << Puzzle::getGoal() << "-----" << std::endl << std::endl;
 		std::list<Puzzle> list = process(start, options);
-		render(list);
+		render(std::vector<Puzzle>(list.begin(), list.end()));
 	}
 	catch (const std::exception &e)
 	{
