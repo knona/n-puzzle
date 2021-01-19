@@ -195,12 +195,13 @@ std::vector<int> list_conflicts_col(const Puzzle &puzzle, int col, int i_tj, int
 int Heuristic::linear_conflicts(const Puzzle &puzzle)
 {
 	int size = Puzzle::getSize();
-	int total = 0;
 	int h = Heuristic::manhattan(puzzle);
 	Array<int> crn(size, 0);// conflicts row number
 	Array<int> ccn(size, 0);// conflicts column number
 	int nb_lc = 0;// score linear conflicts
 
+
+	
 	// Loop on rows
 	for (int row = 0; row < size; row++)
 	{
@@ -219,7 +220,7 @@ int Heuristic::linear_conflicts(const Puzzle &puzzle)
 			// Retrieve list of position the tile is in conflict with
 			std::vector<int> vec = list_conflicts_row(puzzle, row, i_tk, size);
 			// Loop on them and remove one when processed
-			for (int i_tj = 0; i_tj < vec.size(); i_tj++)
+			for (int i_tj = 0; i_tj < static_cast<int>(vec.size()); i_tj++)
 			{
 				crn[vec[i_tj]] -= 1; // Remove one to related conflict
 			}
@@ -245,7 +246,7 @@ int Heuristic::linear_conflicts(const Puzzle &puzzle)
 			// Retrieve list of position the tile is in conflict with
 			std::vector<int> vec = list_conflicts_col(puzzle, col, i_tk, size);
 			// Loop on them and remove one when processed
-			for (int i_tj = 0; i_tj < vec.size(); i_tj++)
+			for (int i_tj = 0; i_tj < static_cast<int>(vec.size()); i_tj++)
 			{
 				ccn[vec[i_tj]] -= 1; // Remove one to related conflict
 			}
