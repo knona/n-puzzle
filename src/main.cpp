@@ -8,6 +8,7 @@
 #include "utils.hpp"
 
 #include <boost/program_options.hpp>
+#include <chrono>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
@@ -17,12 +18,11 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <chrono>
 
 typedef unsigned int uint;
 
 namespace po = boost::program_options;
-namespace chrono = std::chrono; 
+namespace chrono = std::chrono;
 
 int getOptions(int argc, const char **argv, Options &options)
 {
@@ -132,18 +132,14 @@ int main(int argc, char const *argv[])
 		if (!start.checkIsSolvable())
 			throw std::runtime_error("The puzzle is unsolvable");
 		std::cout << "\033[0;33mProcessing...\033[0m" << std::endl;
-		auto t1 = chrono::high_resolution_clock::now();
-		std::list<Puzzle> list = process(start, options);
-		auto t2 = chrono::high_resolution_clock::now();
-		chrono::duration<double, std::milli> fp_ms = t2 - t1;
-		std::cout << "Computed time to solution: " << fp_ms.count() / 1000 << " seconds" << " == " << fp_ms.count() << " ms" << std::endl; 
+		auto                                 t1 = chrono::high_resolution_clock::now();
+		std::list<Puzzle>                    list = process(start, options);
+		auto                                 t2 = chrono::high_resolution_clock::now();
+		chrono::duration<double, std::milli> fpMs = t2 - t1;
+		std::cout << "Computed time to solution: " << fpMs.count() / 1000 << " seconds"
+				  << " == " << fpMs.count() << " ms" << std::endl;
 		if (options.enableGui)
 		{
-			std::cout << "Commands: " << std::endl;
-			std::cout << "    - Speed up / down : \033[0;33mArrow Up / Down\033[0m" << std::endl;
-			std::cout << "    - Previous / next state : \033[0;33mArrow Left / Right\033[0m" << std::endl;
-			std::cout << "    - Pause: \033[0;33mSpace\033[0m" << std::endl;
-			std::cout << "    - Reset to initial state : \033[0;33mR\033[0m" << std::endl;
 			Gui gui;
 			gui.init();
 			gui.render(std::vector<Puzzle>(list.begin(), list.end()));
