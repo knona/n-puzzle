@@ -31,6 +31,7 @@ class Gui
 	sf::Time  _time1;
 	sf::Time  _time2;
 
+	void displayCommands() const;
 	void updateDimensions();
 	void drawHeader();
 	void drawFooter(int index, int indexMax);
