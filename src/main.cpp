@@ -111,6 +111,19 @@ std::list<Puzzle> process(Puzzle &start, const Options &options)
 	return {};
 }
 
+void printDuration(chrono::duration<double, std::milli> fp_ms)
+{
+    auto h = chrono::duration_cast<chrono::hours>(fp_ms);
+    auto m = chrono::duration_cast<chrono::minutes>(fp_ms -= h);
+    auto s = chrono::duration_cast<chrono::seconds>(fp_ms -= m);
+    auto ms = chrono::duration_cast<chrono::milliseconds>(fp_ms -= s);
+    std::cout << "Computed time to solution:"
+		<< h.count() << " hours, "
+        << m.count() << " minutes, "
+        << s.count() << " seconds, "
+        << ms.count() << " milliseconds\n";
+}
+
 int main(int argc, char const *argv[])
 {
 	Options options;
@@ -135,8 +148,8 @@ int main(int argc, char const *argv[])
 		auto t1 = chrono::high_resolution_clock::now();
 		std::list<Puzzle> list = process(start, options);
 		auto t2 = chrono::high_resolution_clock::now();
-		chrono::duration<double, std::milli> fp_ms = t2 - t1;
-		std::cout << "Computed time to solution: " << fp_ms.count() / 1000 << " seconds" << " == " << fp_ms.count() << " ms" << std::endl; 
+		std::cout << "\033[0; Finished...\033[0m" << std::endl;
+		printDuration(t2 - t1);
 		if (options.enableGui)
 		{
 			std::cout << "Commands: " << std::endl;
