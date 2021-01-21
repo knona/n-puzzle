@@ -9,8 +9,9 @@
 struct Options
 {
 	bool                       parseOnly;
-	std::optional<std::string> file;
 	bool                       enableGui;
+	bool                       quiet;
+	std::optional<std::string> file;
 	PathFinding::Algorithm     algorithm;
 };
 

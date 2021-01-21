@@ -3,6 +3,7 @@
 
 #include "Puzzle.class.hpp"
 
+#include <chrono>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -27,10 +28,14 @@ class PathFinding
 		bool operator()(const Puzzle &p1, const Puzzle &p2);
 	};
 
+	unsigned int _timeComplexity;
+	unsigned int _sizeComplexity;
+
 	std::list<Puzzle> getList(CameFromMap &cameFrom, const Puzzle &start, const Puzzle &goal) const;
-	std::list<Puzzle> aStar(Puzzle &start) const;
-	std::list<Puzzle> greedy(Puzzle &start) const;
-	std::list<Puzzle> uniformCost(Puzzle &start) const;
+	std::list<Puzzle> aStar(Puzzle &start);
+	std::list<Puzzle> greedy(Puzzle &start);
+	std::list<Puzzle> uniformCost(Puzzle &start);
+	void              printDuration(std::chrono::duration<double, std::milli> fpMs) const;
 
 	public:
 	enum class Algorithm { aStar, greedy, uniformCost };
@@ -42,7 +47,7 @@ class PathFinding
 	PathFinding &operator=(PathFinding &&) = delete;
 	~PathFinding();
 
-	std::list<Puzzle> resolve(Puzzle &start, Algorithm algorithm) const;
+	std::list<Puzzle> resolve(Puzzle &start, Algorithm algorithm);
 };
 
 #endif // !PATH_FINDING_HPP

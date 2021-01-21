@@ -3,23 +3,16 @@
 #include "Options.struct.hpp"
 #include "Parser.class.hpp"
 #include "PathFinding.class.hpp"
-#include "Position.struct.hpp"
 #include "Puzzle.class.hpp"
-#include "PuzzlePriorityQueue.class.hpp"
 #include "utils.hpp"
 
 #include <boost/program_options.hpp>
-#include <chrono>
-#include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <list>
-#include <queue>
-#include <set>
 #include <vector>
 
 namespace po = boost::program_options;
-namespace chrono = std::chrono;
 
 void setHeuristic(const po::variables_map &vm)
 {
@@ -52,8 +45,9 @@ int getOptions(int argc, const char **argv, Options &options)
 	po::options_description desc(catArgs("Usage: ", argv[0], " [options]\nOptions"));
 	desc.add_options()                                                                  //
 		("help,h", "Produce help message")                                              //
-		("parse-only", "Parse input and display the puzzle")                            //
 		("file,f", po::value<std::string>(), "Path to the puzzle file (default stdin)") //
+		("parse-only", "Parse input and display the puzzle")                            //
+		("quiet,q", "Do not display solution on stdout")                                //
 		("heuristic", po::value<std::string>()->default_value("linear"),                //
 	     "Heuristic to use :[manhattan/linear/hamming] (default linear)")               //
 		("algorithm", po::value<std::string>()->default_value("astar"),                 //
@@ -65,6 +59,7 @@ int getOptions(int argc, const char **argv, Options &options)
 
 	if (vm.count("help"))
 	{
+		std::cin.ignore(std::numeric_limits<int>::max());
 		std::cout << desc << std::endl;
 		return 0;
 	}
@@ -72,19 +67,10 @@ int getOptions(int argc, const char **argv, Options &options)
 		options.file = vm["file"].as<std::string>();
 	options.parseOnly = static_cast<bool>(vm.count("parse-only"));
 	options.enableGui = static_cast<bool>(vm.count("gui"));
+	options.quiet = static_cast<bool>(vm.count("quiet"));
 	setHeuristic(vm);
 	setAlgorithm(vm, options);
 	return 1;
-}
-
-void printDuration(chrono::duration<double, std::milli> fpMs)
-{
-	auto h = chrono::duration_cast<chrono::hours>(fpMs);
-	auto m = chrono::duration_cast<chrono::minutes>(fpMs -= h);
-	auto s = chrono::duration_cast<chrono::seconds>(fpMs -= m);
-	auto ms = chrono::duration_cast<chrono::milliseconds>(fpMs -= s);
-	std::cout << "Computed time to solution:" << h.count() << " hours, " << m.count() << " minutes, " << s.count()
-			  << " seconds, " << ms.count() << " milliseconds\n";
 }
 
 int main(int argc, char const *argv[])
@@ -109,17 +95,18 @@ int main(int argc, char const *argv[])
 		start = parser.getPuzzle();
 		if (!start.checkIsSolvable())
 			throw std::runtime_error("The puzzle is unsolvable");
-		std::cout << "\033[0;33mProcessing...\033[0m" << std::endl;
-		auto              t1 = chrono::high_resolution_clock::now();
 		std::list<Puzzle> list = pathFinding.resolve(start, options.algorithm);
-		auto              t2 = chrono::high_resolution_clock::now();
-		std::cout << "\033[0;32mFinished...\033[0m" << std::endl;
-		printDuration(t2 - t1);
 		if (options.enableGui)
 		{
 			Gui gui;
 			gui.init();
 			gui.render(std::vector<Puzzle>(list.begin(), list.end()));
+		}
+		else if (!options.quiet)
+		{
+			std::cout << "Solution: " << std::endl;
+			for (const Puzzle &puzzle: list)
+				std::cout << puzzle << std::endl;
 		}
 	}
 	catch (const std::exception &e)
