@@ -52,7 +52,6 @@ int CommandLine::getOptions(int argc, const char **argv, Options &options)
 
 	if (vm.count("help"))
 	{
-		std::cin.ignore(std::numeric_limits<int>::max());
 		std::cout << desc << std::endl;
 		return 0;
 	}
