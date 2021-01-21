@@ -21,9 +21,9 @@ do
 	echo -e "\033[33m---------\033[0m"
 	if [ "$valgrind" == true ]
 	then
-		valgrind --leak-check=full -q ./n-puzzle --file=$f --parse-only
+		valgrind --leak-check=full -q ./n-puzzle --file $f --parse-only
 	else
-		./n-puzzle --file=$f --parse-only
+		./n-puzzle --file $f --parse-only
 	fi
 	if [ "$wait" == true ]
 	then
