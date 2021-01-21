@@ -1,6 +1,8 @@
 #ifndef OPTIONS_HPP
 #define OPTIONS_HPP
 
+#include "Heuristic.class.hpp"
+
 #include <optional>
 #include <string>
 

@@ -18,11 +18,22 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
 typedef unsigned int uint;
 
 namespace po = boost::program_options;
 namespace chrono = std::chrono;
+
+void setHeuristicFromOptions(const po::variables_map &vm)
+{
+	if (vm["heuristic"].as<std::string>() == "manhattan")
+		Puzzle::setHeuristicFunction(Heuristic::manhattan);
+	else if (vm["heuristic"].as<std::string>() == "hamming")
+		Puzzle::setHeuristicFunction(Heuristic::hamming);
+	else if (vm["heuristic"].as<std::string>() == "linear")
+		Puzzle::setHeuristicFunction(Heuristic::linearConflicts);
+	else
+		throw std::runtime_error("Please enter a proper heuristic [manhattan/linear/hamming]");
+}
 
 int getOptions(int argc, const char **argv, Options &options)
 {
@@ -31,9 +42,11 @@ int getOptions(int argc, const char **argv, Options &options)
 	po::options_description desc(catArgs("Usage: ", argv[0], " [options]\nOptions"));
 	desc.add_options()                                                                  //
 		("help,h", "Produce help message")                                              //
-		("parse-only,p", "Parse input and display the puzzle")                          //
+		("parse-only", "Parse input and display the puzzle")                            //
 		("file,f", po::value<std::string>(), "Path to the puzzle file (default stdin)") //
-		("gui,g", "Enable the gui");                                                    //
+		("heuristic", po::value<std::string>()->default_value("linear"),
+	     "Heuristic to use :[manhattan/linear/hamming]") //
+		("gui,g", "Enable the gui");                     //
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);
@@ -47,6 +60,7 @@ int getOptions(int argc, const char **argv, Options &options)
 		options.file = vm["file"].as<std::string>();
 	options.parseOnly = static_cast<bool>(vm.count("parse-only"));
 	options.enableGui = static_cast<bool>(vm.count("gui"));
+	setHeuristicFromOptions(vm);
 	return 1;
 }
 
@@ -68,7 +82,6 @@ std::list<Puzzle> process(Puzzle &start, const Options &options)
 	std::unordered_map<size_t, size_t> cameFrom;
 
 	Heuristic::init();
-	Puzzle::setHeuristicFunction(Heuristic::linear_conflicts);
 	Puzzle goal = Puzzle::getGoal();
 
 	start.setG(0);
@@ -113,15 +126,12 @@ std::list<Puzzle> process(Puzzle &start, const Options &options)
 
 void printDuration(chrono::duration<double, std::milli> fp_ms)
 {
-    auto h = chrono::duration_cast<chrono::hours>(fp_ms);
-    auto m = chrono::duration_cast<chrono::minutes>(fp_ms -= h);
-    auto s = chrono::duration_cast<chrono::seconds>(fp_ms -= m);
-    auto ms = chrono::duration_cast<chrono::milliseconds>(fp_ms -= s);
-    std::cout << "Computed time to solution:"
-		<< h.count() << " hours, "
-        << m.count() << " minutes, "
-        << s.count() << " seconds, "
-        << ms.count() << " milliseconds\n";
+	auto h = chrono::duration_cast<chrono::hours>(fp_ms);
+	auto m = chrono::duration_cast<chrono::minutes>(fp_ms -= h);
+	auto s = chrono::duration_cast<chrono::seconds>(fp_ms -= m);
+	auto ms = chrono::duration_cast<chrono::milliseconds>(fp_ms -= s);
+	std::cout << "Computed time to solution:" << h.count() << " hours, " << m.count() << " minutes, " << s.count()
+			  << " seconds, " << ms.count() << " milliseconds\n";
 }
 
 int main(int argc, char const *argv[])
@@ -136,6 +146,7 @@ int main(int argc, char const *argv[])
 
 		Parser parser(options.file);
 		parser.parse();
+
 		if (options.parseOnly)
 		{
 			parser.getPuzzle().print(std::cout, true);
@@ -145,10 +156,10 @@ int main(int argc, char const *argv[])
 		if (!start.checkIsSolvable())
 			throw std::runtime_error("The puzzle is unsolvable");
 		std::cout << "\033[0;33mProcessing...\033[0m" << std::endl;
-		auto t1 = chrono::high_resolution_clock::now();
+		auto              t1 = chrono::high_resolution_clock::now();
 		std::list<Puzzle> list = process(start, options);
-		auto t2 = chrono::high_resolution_clock::now();
-		std::cout << "\033[0; Finished...\033[0m" << std::endl;
+		auto              t2 = chrono::high_resolution_clock::now();
+		std::cout << "\033[0;32mFinished...\033[0m" << std::endl;
 		printDuration(t2 - t1);
 		if (options.enableGui)
 		{
@@ -159,6 +170,7 @@ int main(int argc, char const *argv[])
 	}
 	catch (const std::exception &e)
 	{
+		std::cin.ignore(std::numeric_limits<int>::max());
 		std::cerr << "\033[0;31mError:\033[0m" << std::endl;
 		std::cerr << e.what() << std::endl;
 		return 1;

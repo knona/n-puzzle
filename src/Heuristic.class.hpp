@@ -15,7 +15,7 @@ class Heuristic
 	static Array<Position> goalMap;
 	static int             manhattan(const Puzzle &puzzle);
 	static int             hamming(const Puzzle &puzzle);
-	static int             linear_conflicts(const Puzzle &puzzle);
+	static int             linearConflicts(const Puzzle &puzzle);
 	static void            init();
 };
 
