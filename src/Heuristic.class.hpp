@@ -12,6 +12,8 @@ class Heuristic
 	static Puzzle goal;
 
 	public:
+	enum class Value { manhattan, linear, hamming };
+
 	static Array<Position> goalMap;
 	static int             manhattan(const Puzzle &puzzle);
 	static int             hamming(const Puzzle &puzzle);
