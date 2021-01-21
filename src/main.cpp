@@ -45,7 +45,7 @@ int main(int argc, char const *argv[])
 		}
 		Puzzle start = parser.getPuzzle();
 		if (!start.checkIsSolvable())
-			throw std::runtime_error("The puzzle is unsolvable");
+			throw std::logic_error("The puzzle is unsolvable");
 		std::list<Puzzle> list = pathFinding.resolve(start, options.algorithm);
 		displaySolution(options, list);
 	}
