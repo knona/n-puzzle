@@ -9,14 +9,15 @@
 class Heuristic
 {
 	private:
-	static Puzzle goal;
+	static int              getHighestConflict(const Array<int> &array, int size);
+	static bool             rowConflictsRemain(const Array<int> &array, int size);
+	static std::vector<int> listConflictsRow(const Puzzle &puzzle, int row, int itj, int size);
+	static std::vector<int> listConflictsCol(const Puzzle &puzzle, int col, int itj, int size);
 
 	public:
-	static Array<Position> goalMap;
-	static int             manhattan(const Puzzle &puzzle);
-	static int             hamming(const Puzzle &puzzle);
-	static int             linearConflicts(const Puzzle &puzzle);
-	static void            init();
+	static int manhattan(const Puzzle &puzzle);
+	static int hamming(const Puzzle &puzzle);
+	static int linearConflicts(const Puzzle &puzzle);
 };
 
 #endif // !HEURISTIC_HPP

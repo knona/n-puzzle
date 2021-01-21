@@ -31,9 +31,7 @@ std::list<Puzzle> PathFinding::uniformCost(Puzzle &start)
 	ClosedSet                                       closed;
 	CameFromMap                                     cameFrom;
 
-	Heuristic::init();
 	Puzzle goal = Puzzle::getGoal();
-
 	start.setG(0);
 	opened.push(start);
 
@@ -85,9 +83,7 @@ std::list<Puzzle> PathFinding::greedy(Puzzle &start)
 	ClosedSet                                  closed;
 	CameFromMap                                cameFrom;
 
-	Heuristic::init();
 	Puzzle goal = Puzzle::getGoal();
-
 	start.setH();
 	opened.push(start);
 
@@ -129,9 +125,7 @@ std::list<Puzzle> PathFinding::aStar(Puzzle &start)
 	ClosedSet                                 closed;
 	CameFromMap                               cameFrom;
 
-	Heuristic::init();
 	Puzzle goal = Puzzle::getGoal();
-
 	start.setG(0);
 	start.setH();
 	opened.push(start);

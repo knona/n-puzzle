@@ -1,42 +1,44 @@
 #include "Heuristic.class.hpp"
 
-Puzzle          Heuristic::goal;
-Array<Position> Heuristic::goalMap;
-
-void Heuristic::init()
-{
-	int size = Puzzle::getSize();
-	Heuristic::goal = Puzzle::getGoal();
-	Heuristic::goalMap = Array<Position>(size * size);
-	for (int y = 0; y < size; y++)
-	{
-		for (int x = 0; x < size; x++)
-			Heuristic::goalMap[Heuristic::goal.getAt(y, x)] = { y, x };
-	}
-}
-
 int Heuristic::manhattan(const Puzzle &puzzle)
 {
-	int size = Puzzle::getSize();
-	int total = 0;
+	int                    size = Puzzle::getSize();
+	int                    total = 0;
+	const Array<Position> &goalMap = Puzzle::getGoalMap();
 
 	for (int y = 0; y < size; y++)
 	{
 		for (int x = 0; x < size; x++)
 		{
-			Position &goalPos = Heuristic::goalMap[puzzle.getAt(y, x)];
+			const Position &goalPos = goalMap[puzzle.getAt(y, x)];
 			total += std::abs(goalPos.y - y) + abs(goalPos.x - x);
 		}
 	}
 	return total;
 }
 
+int Heuristic::hamming(const Puzzle &puzzle)
+{
+	int           size = Puzzle::getSize();
+	int           total = 0;
+	const Puzzle &goal = Puzzle::getGoal();
+
+	for (int i = 0; i < size * size; i++)
+	{
+		if (puzzle[i] != goal[i])
+			total += 1;
+	}
+
+	return total;
+}
+
 // Aim of the function:
 // Returns the position of the highest element in the Array
-int getHighestConflict(Array<int> array, int size)
+int Heuristic::getHighestConflict(const Array<int> &array, int size)
 {
 	int iHighest = 0;
 	int highest = 0;
+
 	for (int i = 0; i < size; i++)
 	{
 		if (array[i] > highest)
@@ -50,42 +52,39 @@ int getHighestConflict(Array<int> array, int size)
 
 // Aim of the function:
 // Returns true if array still contains elements > 0
-bool rowConflictsRemain(Array<int> array, int size)
+bool Heuristic::rowConflictsRemain(const Array<int> &array, int size)
 {
 	for (int i = 0; i < size; i++)
 	{
 		if (array[i] > 0)
-		{
 			return true;
-		}
 	}
 	return false;
 }
 
 // Aim of the function:
 // Returns the position of the conflicting tiles, for a given row and a given tile
-std::vector<int> listConflictsRow(const Puzzle &puzzle, int row, int itj, int size)
+std::vector<int> Heuristic::listConflictsRow(const Puzzle &puzzle, int row, int itj, int size)
 {
-	std::vector<int> vec;
-	int              tj = puzzle.getAt(row, itj);
+	std::vector<int>       vec;
+	int                    tj = puzzle.getAt(row, itj);
+	const Array<Position> &goalMap = Puzzle::getGoalMap();
 
-	Position &goalPosTj = Heuristic::goalMap[tj];
+	const Position &goalPosTj = goalMap[tj];
 	// If the current tile is positionned, in the goal puzzle, inside the same row
 	if (goalPosTj.y == row)
 	{
 		// Loop on all tiles in current row of the puzzle
 		for (int itk = 0; itk < size; itk++)
 		{
-			int       tk = puzzle.getAt(row, itk);
-			Position &goalPosTk = Heuristic::goalMap[tk];
+			int             tk = puzzle.getAt(row, itk);
+			const Position &goalPosTk = goalMap[tk];
 			// if tj and tk are different, not equal to 0 (empty tile) and tk is at same row as tj in goal puzzle
 			if (tk != tj && tk != 0 && tj != 0 && goalPosTk.y == row)
 			{
 				// if tj is on the right side of tk and tj's goal pos on the left of tk's goal pos OR contrary
 				if ((itj > itk && goalPosTj.x < goalPosTk.x) || (itj < itk && goalPosTj.x > goalPosTk.x))
-				{
 					vec.push_back(itk);
-				}
 			}
 		}
 	}
@@ -94,28 +93,27 @@ std::vector<int> listConflictsRow(const Puzzle &puzzle, int row, int itj, int si
 
 // Transposed function :
 // We now work on columns, and check for the x instead of the y
-std::vector<int> listConflictsCol(const Puzzle &puzzle, int col, int itj, int size)
+std::vector<int> Heuristic::listConflictsCol(const Puzzle &puzzle, int col, int itj, int size)
 {
-	std::vector<int> vec;
-	int              tj = puzzle.getAt(itj, col);
+	std::vector<int>       vec;
+	int                    tj = puzzle.getAt(itj, col);
+	const Array<Position> &goalMap = Puzzle::getGoalMap();
 
-	Position &goalPosTj = Heuristic::goalMap[tj];
+	const Position &goalPosTj = goalMap[tj];
 	// If the current tile is positionned, in the goal puzzle, inside the same row
 	if (goalPosTj.x == col)
 	{
 		// Loop on all tiles in current row of the puzzle
 		for (int itk = 0; itk < size; itk++)
 		{
-			int       tk = puzzle.getAt(itk, col);
-			Position &goalPosTk = Heuristic::goalMap[tk];
+			int             tk = puzzle.getAt(itk, col);
+			const Position &goalPosTk = goalMap[tk];
 			// if tj and tk are different, not equal to 0 (empty tile) and tk is at same row as tj in goal puzzle
 			if (tk != tj && tk != 0 && tj != 0 && goalPosTk.x == col)
 			{
 				// if tj is on the right side of tk and tj's goal pos on the left of tk's goal pos OR contrary
 				if ((itj > itk && goalPosTj.y < goalPosTk.y) || (itj < itk && goalPosTj.y > goalPosTk.y))
-				{
 					vec.push_back(itk);
-				}
 			}
 		}
 	}
@@ -124,11 +122,10 @@ std::vector<int> listConflictsCol(const Puzzle &puzzle, int col, int itj, int si
 
 int Heuristic::linearConflicts(const Puzzle &puzzle)
 {
-	int        size = Puzzle::getSize();
-	int        h = Heuristic::manhattan(puzzle);
-	int        nbLc = 0;    // score linear conflicts
-	Array<int> crn(size, 0); // conflicts row number
-	Array<int> ccn(size, 0); // conflicts column number
+	int                     size = Puzzle::getSize();
+	int                     nbLc = 0;     // score linear conflicts
+	Array<int>              crn(size);    // conflicts row number
+	Array<int>              ccn(size);    // conflicts column number
 	Array<std::vector<int>> crnVec(size); // conflicts row number
 	Array<std::vector<int>> ccnVec(size); // conflicts row number
 
@@ -151,7 +148,7 @@ int Heuristic::linearConflicts(const Puzzle &puzzle)
 			// Loop list of position the tile is in conflict with and remove one when processed
 			for (int el: crnVec[itk])
 				crn[el] -= 1; // Remove one to related conflict
-			nbLc += 1; // Each removed conflicted equals one conflict
+			nbLc += 1;        // Each removed conflicted equals one conflict
 		}
 	}
 	// Transpose to columns
@@ -174,22 +171,8 @@ int Heuristic::linearConflicts(const Puzzle &puzzle)
 			// Loop list of position the tile is in conflict with and remove one when processed
 			for (int el: ccnVec[itk])
 				ccn[el] -= 1; // Remove one to related conflict
-			nbLc += 1; // Each removed conflicted equals one conflict
+			nbLc += 1;        // Each removed conflicted equals one conflict
 		}
 	}
-	return h + 2 * nbLc;
-}
-
-int Heuristic::hamming(const Puzzle &puzzle)
-{
-	int size = Puzzle::getSize();
-	int total = 0;
-
-	for (int i = 0; i < size * size; i++)
-	{
-		if (puzzle[i] != Heuristic::goal[i])
-			total += 1;
-	}
-
-	return total;
+	return manhattan(puzzle) + 2 * nbLc;
 }
