@@ -353,11 +353,6 @@ void Puzzle::setG(int value)
 	this->_g = value;
 }
 
-int Puzzle::getF() const
-{
-	return this->_g + this->_h;
-}
-
 void Puzzle::setHeuristicFunction(int (*heuristicFunction)(const Puzzle &))
 {
 	Puzzle::_heuristicFunction = heuristicFunction;

@@ -7,14 +7,9 @@
 #include <unordered_set>
 #include <vector>
 
+template<typename CompareFunction>
 class PuzzlePriorityQueue
 {
-	private:
-	struct CompareFunction
-	{
-		bool operator()(const Puzzle &p1, const Puzzle &p2);
-	};
-
 	std::priority_queue<Puzzle, std::vector<Puzzle>, CompareFunction> _queue;
 	std::unordered_set<size_t>                                        _umap;
 
@@ -33,5 +28,7 @@ class PuzzlePriorityQueue
 	void          pop();
 	bool          checkIsFound(const Puzzle &puzzle) const;
 };
+
+#include "PuzzlePriorityQueue.class.tpp"
 
 #endif // !PUZZLE_PRIORITY_QUEUE_HPP

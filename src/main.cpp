@@ -2,6 +2,7 @@
 #include "Heuristic.class.hpp"
 #include "Options.struct.hpp"
 #include "Parser.class.hpp"
+#include "PathFinding.class.hpp"
 #include "Position.struct.hpp"
 #include "Puzzle.class.hpp"
 #include "PuzzlePriorityQueue.class.hpp"
@@ -15,15 +16,12 @@
 #include <list>
 #include <queue>
 #include <set>
-#include <unordered_map>
-#include <unordered_set>
 #include <vector>
-typedef unsigned int uint;
 
 namespace po = boost::program_options;
 namespace chrono = std::chrono;
 
-void setHeuristicFromOptions(const po::variables_map &vm)
+void setHeuristic(const po::variables_map &vm)
 {
 	if (vm["heuristic"].as<std::string>() == "manhattan")
 		Puzzle::setHeuristicFunction(Heuristic::manhattan);
@@ -35,6 +33,18 @@ void setHeuristicFromOptions(const po::variables_map &vm)
 		throw std::runtime_error("Please enter a proper heuristic [manhattan/linear/hamming]");
 }
 
+void setAlgorithm(const po::variables_map &vm, Options &options)
+{
+	if (vm["algorithm"].as<std::string>() == "astar")
+		options.algorithm = PathFinding::Algorithm::aStar;
+	else if (vm["algorithm"].as<std::string>() == "greedy")
+		options.algorithm = PathFinding::Algorithm::greedy;
+	else if (vm["algorithm"].as<std::string>() == "uniform")
+		options.algorithm = PathFinding::Algorithm::uniformCost;
+	else
+		throw std::runtime_error("Please enter a proper algorithm [astar/greedy/uniform]");
+}
+
 int getOptions(int argc, const char **argv, Options &options)
 {
 	std::string file;
@@ -44,9 +54,11 @@ int getOptions(int argc, const char **argv, Options &options)
 		("help,h", "Produce help message")                                              //
 		("parse-only", "Parse input and display the puzzle")                            //
 		("file,f", po::value<std::string>(), "Path to the puzzle file (default stdin)") //
-		("heuristic", po::value<std::string>()->default_value("linear"),
-	     "Heuristic to use :[manhattan/linear/hamming]") //
-		("gui,g", "Enable the gui");                     //
+		("heuristic", po::value<std::string>()->default_value("linear"),                //
+	     "Heuristic to use :[manhattan/linear/hamming] (default linear)")               //
+		("algorithm", po::value<std::string>()->default_value("astar"),                 //
+	     "Algorithm to use :[astar/greedy/uniform] (default astar)")                    //
+		("gui,g", "Enable the gui");                                                    //
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
 	po::notify(vm);
@@ -60,84 +72,26 @@ int getOptions(int argc, const char **argv, Options &options)
 		options.file = vm["file"].as<std::string>();
 	options.parseOnly = static_cast<bool>(vm.count("parse-only"));
 	options.enableGui = static_cast<bool>(vm.count("gui"));
-	setHeuristicFromOptions(vm);
+	setHeuristic(vm);
+	setAlgorithm(vm, options);
 	return 1;
 }
 
-std::list<Puzzle> getList(std::unordered_map<size_t, size_t> &cameFrom, const Puzzle &start, const Puzzle &goal)
+void printDuration(chrono::duration<double, std::milli> fpMs)
 {
-	std::list<Puzzle> solution;
-
-	solution.push_front(goal);
-	while (solution.front() != start)
-		solution.push_front(Puzzle(cameFrom[solution.front().getData()]));
-
-	return solution;
-}
-
-std::list<Puzzle> process(Puzzle &start, const Options &options)
-{
-	PuzzlePriorityQueue                opened;
-	std::unordered_set<size_t>         closed;
-	std::unordered_map<size_t, size_t> cameFrom;
-
-	Heuristic::init();
-	Puzzle goal = Puzzle::getGoal();
-
-	start.setG(0);
-	start.setH();
-	opened.push(start);
-
-	while (!opened.empty())
-	{
-		Puzzle current = opened.top();
-
-		if (current == goal)
-			return getList(cameFrom, start, goal);
-
-		opened.pop();
-		closed.insert(current.getData());
-		for (Puzzle &child: current.getChildren())
-		{
-			bool foundInOpened = opened.checkIsFound(child);
-			bool foundInClosed = closed.find(child.getData()) != closed.end();
-			if (!foundInOpened && !foundInClosed)
-			{
-				child.setG(current.getG() + 1);
-				cameFrom[child.getData()] = current.getData();
-				child.setH();
-				opened.push(child);
-			}
-			else if (child.getG() > current.getG() + 1)
-			{
-				child.setG(current.getG() + 1);
-				cameFrom[child.getData()] = current.getData();
-				if (foundInClosed)
-				{
-					closed.erase(child.getData());
-					child.setH();
-					opened.push(child);
-				}
-			}
-		}
-	}
-	return {};
-}
-
-void printDuration(chrono::duration<double, std::milli> fp_ms)
-{
-	auto h = chrono::duration_cast<chrono::hours>(fp_ms);
-	auto m = chrono::duration_cast<chrono::minutes>(fp_ms -= h);
-	auto s = chrono::duration_cast<chrono::seconds>(fp_ms -= m);
-	auto ms = chrono::duration_cast<chrono::milliseconds>(fp_ms -= s);
+	auto h = chrono::duration_cast<chrono::hours>(fpMs);
+	auto m = chrono::duration_cast<chrono::minutes>(fpMs -= h);
+	auto s = chrono::duration_cast<chrono::seconds>(fpMs -= m);
+	auto ms = chrono::duration_cast<chrono::milliseconds>(fpMs -= s);
 	std::cout << "Computed time to solution:" << h.count() << " hours, " << m.count() << " minutes, " << s.count()
 			  << " seconds, " << ms.count() << " milliseconds\n";
 }
 
 int main(int argc, char const *argv[])
 {
-	Options options;
-	Puzzle  start;
+	Options     options;
+	Puzzle      start;
+	PathFinding pathFinding;
 
 	try
 	{
@@ -157,7 +111,7 @@ int main(int argc, char const *argv[])
 			throw std::runtime_error("The puzzle is unsolvable");
 		std::cout << "\033[0;33mProcessing...\033[0m" << std::endl;
 		auto              t1 = chrono::high_resolution_clock::now();
-		std::list<Puzzle> list = process(start, options);
+		std::list<Puzzle> list = pathFinding.resolve(start, options.algorithm);
 		auto              t2 = chrono::high_resolution_clock::now();
 		std::cout << "\033[0;32mFinished...\033[0m" << std::endl;
 		printDuration(t2 - t1);

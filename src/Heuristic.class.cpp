@@ -192,7 +192,7 @@ int Heuristic::linearConflicts(const Puzzle &puzzle)
 	int        h = Heuristic::manhattan(puzzle);
 	Array<int> crn(size, 0); // conflicts row number
 	Array<int> ccn(size, 0); // conflicts column number
-	int        nbLc = 0;    // score linear conflicts
+	int        nbLc = 0;     // score linear conflicts
 
 	// Loop on rows
 	for (int row = 0; row < size; row++)

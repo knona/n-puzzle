@@ -66,7 +66,6 @@ class Puzzle
 	void                  setH();
 	int                   getG() const;
 	void                  setG(int value);
-	int                   getF() const;
 	bool                  checkIsSolvable() const;
 
 	static int                    getSize();
