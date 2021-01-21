@@ -6,6 +6,7 @@
 #include "Puzzle.class.hpp"
 #include "PuzzlePriorityQueue.class.hpp"
 #include "utils.hpp"
+#include "Heuristic.enum.hpp"
 
 #include <boost/program_options.hpp>
 #include <chrono>
@@ -18,7 +19,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
 typedef unsigned int uint;
 
 namespace po = boost::program_options;
@@ -33,6 +33,7 @@ int getOptions(int argc, const char **argv, Options &options)
 		("help,h", "Produce help message")                                              //
 		("parse-only,p", "Parse input and display the puzzle")                          //
 		("file,f", po::value<std::string>(), "Path to the puzzle file (default stdin)") //
+		("heuristic", po::value<std::string>()->default_value("linear"), "Heuristic to use :[manhattan/linear/hamming]")					//
 		("gui,g", "Enable the gui");                                                    //
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -47,6 +48,24 @@ int getOptions(int argc, const char **argv, Options &options)
 		options.file = vm["file"].as<std::string>();
 	options.parseOnly = static_cast<bool>(vm.count("parse-only"));
 	options.enableGui = static_cast<bool>(vm.count("gui"));
+	if (vm.count("heuristic"))
+	{
+		// Heuristic heur = Heuristic;
+		if (vm["heuristic"].as<std::string>() == "manhattan")
+		// {
+			options.heuristic = Heuristic::manhattan;
+		// }
+		else if (vm["heuristic"].as<std::string>() == "hamming")
+		// {
+			options.heuristic = Heuristic::hamming;
+		// }		
+		else if (vm["heuristic"].as<std::string>() == "linear")
+		// {
+			options.heuristic = Heuristic::linear;
+		// }
+		else
+			throw std::runtime_error("Please enter a proper heuristic [manhattan/linear/hamming]");
+	}
 	return 1;
 }
 
@@ -68,7 +87,7 @@ std::list<Puzzle> process(Puzzle &start, const Options &options)
 	std::unordered_map<size_t, size_t> cameFrom;
 
 	Heuristic::init();
-	Puzzle::setHeuristicFunction(Heuristic::linear_conflicts);
+	Puzzle::setHeuristicFunction(Heuristic::linearConflicts);
 	Puzzle goal = Puzzle::getGoal();
 
 	start.setG(0);
@@ -136,6 +155,13 @@ int main(int argc, char const *argv[])
 
 		Parser parser(options.file);
 		parser.parse();
+		if (options.heuristic == Heuristic::manhattan)
+		{
+			// parser.getPuzzle().print(std::cout, true);
+			std::cout << "top" << std::endl;
+			return 0;
+		}
+		std::cout << "après" << std::endl;
 		if (options.parseOnly)
 		{
 			parser.getPuzzle().print(std::cout, true);
