@@ -33,7 +33,7 @@ unzip -qq $sfml_archive
 cd SFML-2.5.1
 mkdir build
 cd build
-cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_INSTALL_PREFIX=$sfml -DSFML_BUILD_AUDIO=n -DSFML_BUILD_NETWORK=n  ..
+cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_INSTALL_PREFIX=$sfml -DSFML_DEPENDENCIES_INSTALL_PREFIX=$sfml -DSFML_BUILD_AUDIO=n -DSFML_BUILD_NETWORK=n  ..
 make install
 
 cd ../../..
