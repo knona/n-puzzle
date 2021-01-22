@@ -375,11 +375,10 @@ int Puzzle::getPuzzleParity() const
 
 	for (int i = 0; i < size * size; i++)
 	{
-		Position        puzzlePos = puzzle.find(i);
 		const Position &goalPos = goalMap[i];
 		if (i != puzzle.getAt(goalPos))
 		{
-			puzzle.swap(puzzlePos, goalPos);
+			puzzle.swap(puzzle.find(i), goalPos);
 			nbTransitions++;
 		}
 	}
