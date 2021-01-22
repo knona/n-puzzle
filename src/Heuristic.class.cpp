@@ -126,8 +126,8 @@ int Heuristic::linearConflicts(const Puzzle &puzzle)
 	int                     nbLc = 0;     // score linear conflicts
 	Array<int>              crn(size);    // conflicts row number
 	Array<int>              ccn(size);    // conflicts column number
-	Array<std::vector<int>> crnVec(size); // conflicts row number
-	Array<std::vector<int>> ccnVec(size); // conflicts row number
+	Array<std::vector<int>> crnVec(size); // list of conflict's positions on a row
+	Array<std::vector<int>> ccnVec(size); // list of conflict's positions on a column
 
 	// Loop on rows
 	for (int row = 0; row < size; row++)
