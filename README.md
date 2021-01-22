@@ -2,27 +2,21 @@
 
 ## Dépendences
 
-### Boost program_options
+Les bibliothèques **SFML** et **Boost** sont utilisées pour ce projet. Elles sont construites à partir de leurs fichiers sources qui sont téléchargés.
 
-Facilite le parsing des différents arguments passés en ligne de commande.
-[Documentation](https://www.boost.org/doc/libs/1_75_0/doc/html/program_options.html)
+Cependant, la bilbliothèque **SFML** possède des dépendences que vous pouvez retrouver [ici](https://www.sfml-dev.org/faq.php#grl-dependencies).
+Pour les distributions basées sur debian vous pouvez les installer via cette commande :
+```bash
+apt install libpthread-stubs0-dev libopengl-dev libx11-dev libxrandr-dev libudev-dev libfreetype-dev
+```
 
-- **Debian-based distribution**: `apt install libboost-program-options-dev`
-
-### Sfml
-
-Cette bibliothèque graphique permet l'affichage du puzzle et de sa solution.
-[Site web](https://www.sfml-dev.org/index.php)
-
-- **Debian-based distribution**: `apt install libsfml-dev`
-  
-libpthread-stubs0-dev
-libopengl-dev
-libx11-dev
-libxrandr-dev
-libudev-dev
-libfreetype-dev
-<!-- libopenal-dev libvorbis-dev libflac-dev -->
+Vous pouvez construire et compiler le projet avec les commandes suivantes (contenues dans build.bash) :
+```bash
+./scripts/install-sfml.bash
+./scripts/install-boost.bash
+cmake .
+make
+```
 
 ## Tests
 
