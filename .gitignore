@@ -34,3 +34,6 @@
 
 n-puzzle
 .vscode
+libs/
+.cache
+.tmp

@@ -15,6 +15,14 @@ Cette bibliothèque graphique permet l'affichage du puzzle et de sa solution.
 [Site web](https://www.sfml-dev.org/index.php)
 
 - **Debian-based distribution**: `apt install libsfml-dev`
+  
+libpthread-stubs0-dev
+libopengl-dev
+libx11-dev
+libxrandr-dev
+libudev-dev
+libfreetype-dev
+<!-- libopenal-dev libvorbis-dev libflac-dev -->
 
 ## Tests
 
