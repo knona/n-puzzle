@@ -1,10 +1,5 @@
 #include "Exception.class.hpp"
 
-const char *Exception::GameOver::what() const throw()
-{
-	return "\033[0;31mGAME OVER\033[0m";
-}
-
 Exception::Parser::Parser(const std::string line, FilePosition pos, const std::string &detail)
 {
 	std::stringstream buffer;

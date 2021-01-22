@@ -8,16 +8,11 @@
 #include <string>
 
 typedef unsigned int uint;
+
 class Exception
 {
 	public:
 	static std::string error;
-
-	class GameOver: public std::exception
-	{
-		public:
-		virtual const char *what() const throw();
-	};
 
 	class Parser: public std::exception
 	{
