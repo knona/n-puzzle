@@ -13,7 +13,9 @@ include_directories(src/ src/class src/enum src/exception src/struct)
 
 set(SOURCES src/Parser.class.cpp src/exception/Exception.class.cpp src/class/Puzzle.class.cpp src/Heuristic.class.cpp src/struct/Position.struct.cpp src/main.cpp src/CommandLine.class.cpp src/PathFinding.class.cpp src/Gui.class.cpp)
 
+include_directories(${CMAKE_SOURCE_DIR}/libs/boost/include)
+include_directories(${CMAKE_SOURCE_DIR}/libs/sfml/include)
 find_package(Boost COMPONENTS program_options REQUIRED)
 find_package(SFML COMPONENTS graphics system window REQUIRED)
 add_executable(n-puzzle ${SOURCES})
-target_link_libraries(n-puzzle LINK_PUBLIC sfml-graphics sfml-system sfml-window boost_program_options)
+target_link_libraries(n-puzzle LINK_PUBLIC sfml-graphics sfml-system sfml-window ${Boost_LIBRARIES})
