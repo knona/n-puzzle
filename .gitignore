@@ -31,6 +31,23 @@
 *.out
 *.app
 
+# Cmake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
 
 n-puzzle
 .vscode
+libs/
+.cache/
+.tmp/
+build/
