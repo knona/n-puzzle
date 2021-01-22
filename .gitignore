@@ -35,5 +35,6 @@
 n-puzzle
 .vscode
 libs/
-.cache
-.tmp
+.cache/
+.tmp/
+build/
