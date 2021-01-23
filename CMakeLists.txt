@@ -4,7 +4,6 @@ project(N-Puzzle)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_COMPILER "clang++")
 add_compile_options(-Wall -Wextra -Ofast)
 
 include_directories(
