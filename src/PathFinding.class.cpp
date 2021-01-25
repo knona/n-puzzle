@@ -201,7 +201,7 @@ std::list<Puzzle> PathFinding::resolve(Puzzle &start, Algorithm algorithm)
 	auto t2 = std::chrono::high_resolution_clock::now();
 	std::cout << "\033[0;32mFinished\033[0m" << std::endl;
 	this->printDuration(t2 - t1);
-	std::cout << "Number of moves: \033[0;36m" << list.size() << "\033[0m" << std::endl;
+	std::cout << "Number of moves: \033[0;36m" << list.size() - 1 << "\033[0m" << std::endl;
 	std::cout << "Time complexity: \033[0;36m" << this->_timeComplexity << "\033[0m" << std::endl;
 	std::cout << "Size complexity: \033[0;36m" << this->_sizeComplexity << "\033[0m" << std::endl;
 	std::cout << std::endl;

@@ -71,3 +71,35 @@ Les tests s'effectuent un à un, en affichant le fichier avant. Les options suiv
 
 - `--no-waiting` : permet de ne pas attendre l'input utilisateur entre chacun des tests
 - `--valgrind` : lance le programme avec valgrind et les options **-q** et **--leak-check=full** qui permettent d'afficher un message seulement si des memory leaks sont présents
+
+##Détails sur le projet
+
+N-Puzzle est le premier projet avancé de parcours de graphe de la branche `Algorithmique` de 42. L'algorithme principal imposé est l'A*, de type parcours en largeur, que nous utilisons de concert avec trois heuristiques, au choix :
+
+1. Manhattan distance
+2. Hamming distance
+3. Linear Conflict Distance
+
+Une heuristique n'est admissible que si elle ne surestime jamais le coût pour atteindre l'objectif. Ici, l'objectif est de réussir à atteindre l'état final du puzzle. Les trois heuristiques présentées ci-dessus sont toutes les trois admissibles, ce que nous allons essayer d'expliciter ci-après.
+
+####Manhattan Distance
+
+Aussi appelée taxi-distance, nous utilisons la somme des distances de Manhattan de chaque pièce du puzzle comme heuristique.
+
+*Formule de la distance de Manhattan:*
+$$
+d(A,B) = |Xb - Xa| + |Yb - Ya|
+$$
+
+
+*Définition de notre heuristique :*
+$$
+\begin{align*}
+h(puzzle) &= \sum(d(A,B))\  \forall\ piece\ in\ Puzzle \\
+&\ with\ \\
+&A =position\ actual\ piece \\
+&B = expected\ position\ actual\ piece
+\end{align*}
+$$
+L'utilisation d'une heuristique en tant qu'estimation locale du choix optimal permet de parcourir le graphe de façon plus rapide et, dans notre cas, grâce à son admissibilité, de ressortir le plus court chemin amenant à la solution.
+
