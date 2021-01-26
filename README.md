@@ -2,7 +2,7 @@
 
 
 
-N-Puzzle est le premier projet avancé de parcours de graphe de la branche `Algorithmique` de 42. L'algorithme principal imposé est l'A*, de type parcours en largeur, que nous utilisons de concert avec trois heuristiques, à savoir :
+N-Puzzle est le premier projet avancé de parcours de graphe de la branche `Algorithmique` de 42. L'algorithme principal imposé est l'A*, de type parcours en largeur, que nous utilisons de concert avec trois heuristiques, à savoir:
 
 1. *Manhattan distance*
 2. *Hamming distance*
