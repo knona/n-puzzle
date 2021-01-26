@@ -65,7 +65,7 @@ Notre heuristique se base plutôt sur la Manhattan distance totale du Puzzle, à
 
 *Définition de notre heuristique :*
 
-<img src="https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign*%7D%0Ah(puzzle)%20%26%3D%20Md(puzzle)%20%2B%202*%20%5Cmin%5C%7B%5C%20conflict(row%7Ccolumn)%5C%7D%5C%20%5C%5C%0A%26%5Cforall%5C%20row%7Ccolumn%5C%C2%A0in%5C%20Puzzle%5C%0A%5Cend%7Balign*%7D">
+<img src="https://render.githubusercontent.com/render/math?math=%5Cbegin%7Balign*%7D%0Ah(puzzle)%20%26%3D%20Md(puzzle)%20%2B%202*%20%5Cmin%5C%7B%5C%20conflict(row%2Fcolumn)%5C%7D%5C%20%5C%5C%0A%26%5Cforall%5C%20row%2Fcolumn%5C%20in%5C%20Puzzle%5C%0A%5Cend%7Balign*%7D">
 
 Cette heuristique est elle-aussi admissible car elle ne surestime jamais la distance entre deux pièces. En effet, nous ne cherchons pas à résoudre les conflits de manière optimale, mais à déplacer les pièces contenant le plus de conflits en priorité. De ce fait, nous nous retrouvons toujours avec le nombre minimal de pièces à déplacer sur un puzzle donné, afin de ne plus avoir les conflits actuels. 
 
