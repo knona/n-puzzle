@@ -12,7 +12,7 @@ Une heuristique n'est admissible que si elle ne surestime jamais le coût pour a
 
 L'utilisation d'une heuristique en tant qu'estimation locale du choix optimal permet de parcourir le graphe de façon plus rapide et, dans notre cas, grâce à son admissibilité, de ressortir le plus court chemin amenant à la solution.
 
-####Manhattan Distance
+#### Manhattan Distance
 
 Aussi appelée taxi-distance, nous utilisons la somme des distances de Manhattan de chaque pièce du puzzle comme heuristique.
 
