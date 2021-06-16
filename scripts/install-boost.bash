@@ -18,7 +18,7 @@ cache=$(pwd)/.cache
 mkdir -p $cache
 
 boost_archive=$cache/boost.tar.gz
-boost_dl_url=https://dl.bintray.com/boostorg/release/1.75.0/source/boost_1_75_0.tar.gz
+boost_dl_url=https://boostorg.jfrog.io/artifactory/main/release/1.75.0/source/boost_1_75_0.tar.gz
 
 if [ ! -f "$boost_archive" ]
 then
